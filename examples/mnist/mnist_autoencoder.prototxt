@@ -10,9 +10,9 @@ layer {
     scale: 0.0039215684
   }
   data_param {
-    source: "examples/mnist/mnist_train_lmdb"
+    source: "examples/mnist/mnist-train-leveldb"
     batch_size: 100
-    backend: LMDB
+    backend: LEVELDB
   }
 }
 layer {
@@ -27,9 +27,9 @@ layer {
     scale: 0.0039215684
   }
   data_param {
-    source: "examples/mnist/mnist_train_lmdb"
+    source: "examples/mnist/mnist-train2-leveldb"
     batch_size: 100
-    backend: LMDB
+    backend: LEVELDB
   }
 }
 layer {
@@ -44,9 +44,9 @@ layer {
     scale: 0.0039215684
   }
   data_param {
-    source: "examples/mnist/mnist_test_lmdb"
+    source: "examples/mnist/mnist-test-leveldb"
     batch_size: 100
-    backend: LMDB
+    backend: LEVELDB
   }
 }
 layer {

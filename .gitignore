@@ -115,3 +115,14 @@ MANIFEST-*
 3rdparty2012
 
 Inceptionism
+/examples/mnist/convert_mnist_data.exe
+/examples/mnist/data/t10k-images-idx3-ubyte
+/examples/mnist/data/t10k-images-idx3-ubyte.gz
+/examples/mnist/data/t10k-labels-idx1-ubyte
+/examples/mnist/data/t10k-labels-idx1-ubyte.gz
+/examples/mnist/data/train-images-idx3-ubyte
+/examples/mnist/data/train-images-idx3-ubyte.gz
+/examples/mnist/data/train-labels-idx1-ubyte
+/examples/mnist/data/train-labels-idx1-ubyte.gz
+/matt/datasetProcessor/datasetProcessor.v12.suo
+/matt/predictiveEncoder/predictiveEncoder.v12.suo
