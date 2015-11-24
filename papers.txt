@@ -1,0 +1,12 @@
+http://lmb.informatik.uni-freiburg.de/resources/software.php
+http://cs.stanford.edu/people/karpathy/deepvideo/deepvideo_cvpr2014.pdf
+http://arxiv.org/pdf/1506.02753v2.pdf
+
+https://initialneil.wordpress.com/2015/07/15/caffe-vs2013-opencv-in-windows-tutorial-i/
+https://github.com/initialneil/caffe-vs2013/tree/master/caffe/data
+
+https://github.com/yangyanli/caffe/blob/master/tools/extract_features.cpp
+
+http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf
+
+http://caffe.berkeleyvision.org/tutorial/layers.html

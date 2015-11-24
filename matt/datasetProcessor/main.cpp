@@ -36,8 +36,29 @@ public:
 
 void ImageDatabase::makeTestDatabase(const string &directory, int imageCount)
 {
+    const int size = 82;
+    const float radius = 20.0f;
+
     util::makeDirectory(directory);
-    
+    for (int i = 0; i < imageCount; i++)
+    {
+        ColorImageR8G8B8A8 image(size, size);
+        image.setPixels(vec4uc(0, 0, 0, 255));
+        vec2i center(rand() % size, rand() % size);
+
+        for (auto &p : image)
+        {
+            const float distSq = vec2i::distSq(vec2i(p.x, p.y), center);
+            if (distSq < radius * radius)
+            {
+                const float ratio = sqrtf(distSq) / radius;
+                const BYTE c = util::boundToByte((1.0f - ratio) * 255.0f);
+                p.value = vec4uc(c, c, c, 255);
+            }
+        }
+
+        LodePNG::save(image, directory + to_string(i) + ".png");
+    }
 }
 
 void ImageDatabase::load(const string &directory)
@@ -110,7 +131,7 @@ void ImageDatabase::save(const string &directory)
         datum.set_data(pixelData, pixelCount * channelCount);
         datum.set_label(entry.label);
 
-        sprintf_s(key_cstr, kMaxKeyLength, "%08d", item_id);
+        sprintf_s(key_cstr, kMaxKeyLength, "%08d", entryIndex);
         datum.SerializeToString(&value);
         string keystr(key_cstr);
 
@@ -127,14 +148,17 @@ void ImageDatabase::save(const string &directory)
     // write the last batch
     if (count % 1000 != 0) {
         db->Write(leveldb::WriteOptions(), batch);
-        delete batch;
-        delete db;
-        cout << "Processed " << count << " files.";
     }
+    delete batch;
+    delete db;
+    cout << "Processed " << count << " files.";
 }
 
 void main()
 {
+    const string baseDir = R"(C:\Code\caffe\caffe-windows\matt\data\)";
     ImageDatabase database;
-    database.load();
+    ImageDatabase::makeTestDatabase(baseDir + "circlesRaw\\", 1000);
+    database.load(baseDir + "circlesRaw\\");
+    database.save(baseDir + "circles-leveldb");
 }
