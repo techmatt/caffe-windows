@@ -5,16 +5,30 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "modelInspector", "modelInspector.vcxproj", "{3EFA02D2-1908-4036-9A87-225F8A0982D5}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "caffelib", "..\..\buildVS2013\caffelib\caffelib.vcxproj", "{63A79297-9CC4-4081-ADAC-7F40CE965C95}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
 		Debug|x64 = Debug|x64
+		Release|Win32 = Release|Win32
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3EFA02D2-1908-4036-9A87-225F8A0982D5}.Debug|Win32.ActiveCfg = Debug|x64
 		{3EFA02D2-1908-4036-9A87-225F8A0982D5}.Debug|x64.ActiveCfg = Debug|x64
 		{3EFA02D2-1908-4036-9A87-225F8A0982D5}.Debug|x64.Build.0 = Debug|x64
+		{3EFA02D2-1908-4036-9A87-225F8A0982D5}.Release|Win32.ActiveCfg = Release|x64
 		{3EFA02D2-1908-4036-9A87-225F8A0982D5}.Release|x64.ActiveCfg = Release|x64
 		{3EFA02D2-1908-4036-9A87-225F8A0982D5}.Release|x64.Build.0 = Release|x64
+		{63A79297-9CC4-4081-ADAC-7F40CE965C95}.Debug|Win32.ActiveCfg = Debug|Win32
+		{63A79297-9CC4-4081-ADAC-7F40CE965C95}.Debug|Win32.Build.0 = Debug|Win32
+		{63A79297-9CC4-4081-ADAC-7F40CE965C95}.Debug|x64.ActiveCfg = Debug|x64
+		{63A79297-9CC4-4081-ADAC-7F40CE965C95}.Debug|x64.Build.0 = Debug|x64
+		{63A79297-9CC4-4081-ADAC-7F40CE965C95}.Release|Win32.ActiveCfg = Release|Win32
+		{63A79297-9CC4-4081-ADAC-7F40CE965C95}.Release|Win32.Build.0 = Release|Win32
+		{63A79297-9CC4-4081-ADAC-7F40CE965C95}.Release|x64.ActiveCfg = Release|x64
+		{63A79297-9CC4-4081-ADAC-7F40CE965C95}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

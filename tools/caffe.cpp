@@ -388,6 +388,12 @@ int main(int argc, char** argv) {
       "  time            benchmark model execution time");
   // Run tool or show usage.
   caffe::GlobalInit(&argc, &argv);
+
+  const string pretrainedModelSpec = R"(C:\Code\caffe\caffe-windows\matt\data\autoencoder\circle-autoencoder-net.prototxt)";
+  const string pretrainedModelParams = R"(C:\Code\caffe\caffe-windows\matt\data\autoencoder\snapshot_iter_11873.caffemodel)";
+
+  caffe::shared_ptr< Net<float> > net(new Net<float>(pretrainedModelSpec, caffe::TEST));
+
   if (argc == 2) {
 #ifdef WITH_PYTHON_LAYER
     try {
