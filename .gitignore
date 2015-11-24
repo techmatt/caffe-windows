@@ -126,3 +126,4 @@ Inceptionism
 /examples/mnist/data/train-labels-idx1-ubyte.gz
 /matt/datasetProcessor/datasetProcessor.v12.suo
 /matt/predictiveEncoder/predictiveEncoder.v12.suo
+/matt/modelInspector/modelInspector.v12.suo
