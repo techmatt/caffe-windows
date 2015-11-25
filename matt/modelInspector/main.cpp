@@ -15,36 +15,29 @@
 #include "caffe/caffe.hpp"
 #include "caffe/util/signal_handler.h"
 
-/*#include "boost/algorithm/string.hpp"
-#include "google/protobuf/text_format.h"
-
-#include "caffe/blob.hpp"
-#include "caffe/common.hpp"
-#include "caffe/net.hpp"
-#include "caffe/proto/caffe.pb.h"
-#include "caffe/util/db.hpp"
-#include "caffe/util/io.hpp"
-#include "caffe/vision_layers.hpp"*/
-
 using namespace caffe;  // NOLINT(build/namespaces)
 using namespace google;
 using std::string;
 
-/*namespace caffe
-{
-    //extern REGISTER_LAYER_CLASS(Data);
-    extern INSTANTIATE_CLASS(BaseDataLayer);
-    extern INSTANTIATE_CLASS(BasePrefetchingDataLayer);
-    extern INSTANTIATE_CLASS(DataLayer);
-    extern INSTANTIATE_CLASS(ConvolutionLayer);
-    extern INSTANTIATE_CLASS(PoolingLayer);
-    extern INSTANTIATE_CLASS(ReLULayer);
-    extern INSTANTIATE_CLASS(TanHLayer);
-}*/
-
 namespace caffe
 {
     //REGISTER_LAYER_CLASS(Data);
+}
+
+ColorImageR8G8B8A8 blobToImage(const caffe::shared_ptr< Blob<float> > &blob, int imageIndex)
+{
+    ColorImageR8G8B8A8 image(blob->width(), blob->height());
+    for (auto &p : image)
+    {
+        for (int channel = 0; channel < 3; channel++)
+        {
+            const float *dataStart = blob->cpu_data() + blob->offset(imageIndex, channel, p.x, p.y);
+            const BYTE value = util::boundToByte(*dataStart * 255.0f);
+            p.value[channel] = value;
+        }
+        p.value.a = 255;
+    }
+    return image;
 }
 
 void main(int argc, char** argv)
@@ -52,6 +45,9 @@ void main(int argc, char** argv)
     google::InitGoogleLogging(argv[0]);
     //caffe::GlobalInit(&argc, &argv);
     const string baseDir = R"(C:\Code\caffe\caffe-windows\matt\data\)";
+
+    const string outputDir = baseDir + "output/";
+    util::makeDirectory(outputDir);
     
     const bool useGPU = true;
     if (useGPU)
@@ -74,7 +70,8 @@ void main(int argc, char** argv)
     caffe::shared_ptr< Net<float> > net(new Net<float>(pretrainedModelSpec, caffe::TEST));
     net->CopyTrainedLayersFrom(pretrainedModelParams);
 
-    const string blobName = "deconv3";
+    const string dataBlobName = "data";
+    const string featureBlobName = "deconv3";
 
     LOG(ERROR) << "All blobs:";
     for (const string &name : net->blob_names())
@@ -82,9 +79,11 @@ void main(int argc, char** argv)
         LOG(ERROR) << "  " << name;
     }
 
-    return;
-    CHECK(net->has_blob(blobName))
-        << "Unknown feature blob name " << blobName << " in the network " << pretrainedModelSpec;
+    CHECK(net->has_blob(dataBlobName))
+        << "Unknown feature blob name " << dataBlobName << " in the network " << pretrainedModelSpec;
+
+    CHECK(net->has_blob(featureBlobName))
+        << "Unknown feature blob name " << featureBlobName << " in the network " << pretrainedModelSpec;
 
     const int minibatchCount = 1;
     
@@ -100,19 +99,29 @@ void main(int argc, char** argv)
     {
         net->Forward(inputBlobs);
 
-        const caffe::shared_ptr< Blob<float> > featureBlob = net->blob_by_name(blobName);
-        int batch_size = featureBlob->num();
-        int dim_features = featureBlob->count() / batch_size;
+        const caffe::shared_ptr< Blob<float> > dataBlob = net->blob_by_name(dataBlobName);
+        const caffe::shared_ptr< Blob<float> > featureBlob = net->blob_by_name(featureBlobName);
+
+        LOG(ERROR) << "data dims: " << dataBlob->width() << "x" << dataBlob->height() << "x" << dataBlob->channels();
+        LOG(ERROR) << "feature dims: " << featureBlob->width() << "x" << featureBlob->height() << "x" << dataBlob->channels();
+
+        int imageCount = featureBlob->num();
         const float* blobData;
-        for (int n = 0; n < batch_size; ++n)
+        for (int imageIndex = 0; imageIndex < imageCount; imageIndex++)
         {
-            datum.set_height(featureBlob->height());
+            auto imageA = blobToImage(dataBlob, imageIndex);
+            auto imageB = blobToImage(featureBlob, imageIndex);
+
+            LodePNG::save(imageA, outputDir + "b" + to_string(batchIndex) + "i" + to_string(imageIndex) + "_in.png");
+            LodePNG::save(imageB, outputDir + "b" + to_string(batchIndex) + "i" + to_string(imageIndex) + "_out.png");
+
+            /*datum.set_height(featureBlob->height());
             datum.set_width(featureBlob->width());
             datum.set_channels(featureBlob->channels());
             datum.clear_data();
             datum.clear_float_data();
             blobData = featureBlob->cpu_data() + featureBlob->offset(n);
-            /*for (int d = 0; d < dim_features; ++d)
+            for (int d = 0; d < dim_features; ++d)
                 datum.add_float_data(blobData[d]);
             int length = _snprintf(keyStr, maxKeyStrLength, "%010d", imageIndex);
             

@@ -121,11 +121,12 @@ void ImageDatabase::save(const string &directory)
         
         auto image = LodePNG::load(entry.filename);
         int pIndex = 0;
-        for (const auto &p : image)
+        for (int channel = 0; channel < 3; channel++)
         {
-            pixelData[pIndex++] = p.value.r;
-            pixelData[pIndex++] = p.value.g;
-            pixelData[pIndex++] = p.value.b;
+            for (const auto &p : image)
+            {
+                pixelData[pIndex++] = p.value[channel];
+            }
         }
 
         datum.set_data(pixelData, pixelCount * channelCount);
@@ -160,5 +161,6 @@ void main()
     ImageDatabase database;
     ImageDatabase::makeTestDatabase(baseDir + "circlesRaw\\", 1000);
     database.load(baseDir + "circlesRaw\\");
-    database.save(baseDir + "circles-leveldb");
+    database.save(baseDir + "circles-train-leveldb");
+    database.save(baseDir + "circles-test-leveldb");
 }
