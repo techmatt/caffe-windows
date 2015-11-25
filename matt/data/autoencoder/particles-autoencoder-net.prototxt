@@ -10,11 +10,11 @@ layer {
   transform_param {
     mirror: false
     scale: 0.0039215684
-	mean_file: "C:/Code/caffe/caffe-windows/matt/data/circles-mean.binaryproto"
+	mean_file: "C:/Code/caffe/caffe-windows/matt/data/particles-mean.binaryproto"
   }
   data_param {
-    source: "C:/Code/caffe/caffe-windows/matt/data/circles-train-leveldb"
-    batch_size: 50
+    source: "C:/Code/caffe/caffe-windows/matt/data/particles-train-leveldb"
+    batch_size: 100
     backend: LEVELDB
   }
 }
@@ -29,11 +29,11 @@ layer {
   transform_param {
     mirror: false
     scale: 0.0039215684
-	mean_file: "C:/Code/caffe/caffe-windows/matt/data/circles-mean.binaryproto"
+	mean_file: "C:/Code/caffe/caffe-windows/matt/data/particles-mean.binaryproto"
   }
   data_param {
-    source: "C:/Code/caffe/caffe-windows/matt/data/circles-test-leveldb"
-    batch_size: 50
+    source: "C:/Code/caffe/caffe-windows/matt/data/particles-test-leveldb"
+    batch_size: 100
     backend: LEVELDB
   }
 }
@@ -50,7 +50,7 @@ layer {
     lr_mult: 2
   }
   convolution_param {
-    num_output: 20
+    num_output: 64
     kernel_size: 8
     stride: 2
     weight_filler {
@@ -81,7 +81,7 @@ layer {
     lr_mult: 2
   }
   convolution_param {
-    num_output: 50
+    num_output: 128
     kernel_size: 6
     stride: 2
     weight_filler {
@@ -112,7 +112,7 @@ layer {
     lr_mult: 2
   }
   convolution_param {
-    num_output: 50
+    num_output: 128
     kernel_size: 4
     stride: 2
     weight_filler {
@@ -143,7 +143,7 @@ layer {
     lr_mult: 2
   }
   inner_product_param {
-    num_output: 128
+    num_output: 1024
     weight_filler {
       type: "xavier"
     }
@@ -172,7 +172,7 @@ layer {
     lr_mult: 2
   }
   inner_product_param {
-    num_output: 2048
+    num_output: 4096
     weight_filler {
       type: "xavier"
     }
@@ -197,7 +197,7 @@ layer {
   reshape_param {
     shape {
 	  dim: -1
-      dim: 32
+      dim: 64
       dim: 8
       dim: 8
     }
@@ -219,7 +219,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 32
+    num_output: 128
     stride: 2
     weight_filler {
       type: "xavier"
@@ -253,7 +253,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 32
+    num_output: 128
     stride: 2
     weight_filler {
       type: "xavier"

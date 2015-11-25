@@ -19,11 +19,6 @@ using namespace caffe;  // NOLINT(build/namespaces)
 using namespace google;
 using std::string;
 
-namespace caffe
-{
-    //REGISTER_LAYER_CLASS(Data);
-}
-
 ColorImageR8G8B8A8 blobToImage(const caffe::shared_ptr< Blob<float> > &blob, int imageIndex)
 {
     ColorImageR8G8B8A8 image(blob->width(), blob->height());
@@ -65,7 +60,7 @@ void main(int argc, char** argv)
     }
 
     const string pretrainedModelSpec = R"(C:\Code\caffe\caffe-windows\matt\data\autoencoder\circle-autoencoder-net.prototxt)";
-    const string pretrainedModelParams = R"(C:\Code\caffe\caffe-windows\matt\data\autoencoder\snapshot_iter_11873.caffemodel)";
+    const string pretrainedModelParams = R"(C:\Code\caffe\caffe-windows\matt\data\autoencoder\snapshot_iter_56392.caffemodel)";
 
     caffe::shared_ptr< Net<float> > net(new Net<float>(pretrainedModelSpec, caffe::TEST));
     net->CopyTrainedLayersFrom(pretrainedModelParams);

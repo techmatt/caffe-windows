@@ -1,13 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="mLibSource.cpp" />
-    <ClCompile Include="particleSystem.cpp" />
+    <ClInclude Include="vizzer.h" />
+    <ClInclude Include="main.h" />
+    <ClInclude Include="mLibInclude.h" />
+    <ClInclude Include="particleSystem.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="mLibInclude.h" />
-    <ClInclude Include="main.h" />
-    <ClInclude Include="particleSystem.h" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="mLibSource.cpp" />
+    <ClCompile Include="vizzer.cpp" />
+    <ClCompile Include="particleSystem.cpp" />
   </ItemGroup>
 </Project>

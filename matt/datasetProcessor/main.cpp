@@ -1,5 +1,5 @@
 
-#include "mLibInclude.h"
+#include "main.h"
 
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
@@ -8,13 +8,9 @@
 #include <sys/stat.h>
 #include <direct.h>
 
-#include <fstream>  // NOLINT(readability/streams)
-#include <string>
-
 #include "caffe/proto/caffe.pb.h"
 
 using namespace caffe;  // NOLINT(build/namespaces)
-using std::string;
 
 class ImageDatabase
 {
@@ -158,9 +154,20 @@ void ImageDatabase::save(const string &directory)
 void main()
 {
     const string baseDir = R"(C:\Code\caffe\caffe-windows\matt\data\)";
-    ImageDatabase database;
-    ImageDatabase::makeTestDatabase(baseDir + "circlesRaw\\", 1000);
-    database.load(baseDir + "circlesRaw\\");
-    database.save(baseDir + "circles-train-leveldb");
-    database.save(baseDir + "circles-test-leveldb");
+    
+    //ImageDatabase::makeTestDatabase(baseDir + "circles-train-raw\\", 10000);
+    //ImageDatabase::makeTestDatabase(baseDir + "circles-test-raw\\", 10000);
+
+    ParticleSystem::makeDatabase(baseDir + "particles-train-raw\\", 10000);
+    ParticleSystem::makeDatabase(baseDir + "particles-test-raw\\", 10000);
+
+    const string databaseName = "particles";
+
+    ImageDatabase databaseA;
+    databaseA.load(baseDir + databaseName + "-train-raw\\");
+    databaseA.save(baseDir + databaseName + "-train-leveldb");
+
+    ImageDatabase databaseB;
+    databaseB.load(baseDir + databaseName + "-test-raw\\");
+    databaseB.save(baseDir + databaseName + "-test-leveldb");
 }
