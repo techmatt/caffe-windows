@@ -143,7 +143,7 @@ layer {
     lr_mult: 2
   }
   inner_product_param {
-    num_output: 1024
+    num_output: 2048
     weight_filler {
       type: "xavier"
     }
@@ -172,7 +172,7 @@ layer {
     lr_mult: 2
   }
   inner_product_param {
-    num_output: 4096
+    num_output: 2048
     weight_filler {
       type: "xavier"
     }
@@ -190,14 +190,43 @@ layer {
 }
 
 layer {
+  name: "ip3"
+  type: "InnerProduct"
+  bottom: "ip2"
+  top: "ip3"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 8192
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "relu-ip3"
+  type: "ReLU"
+  bottom: "ip3"
+  top: "ip3"
+}
+
+layer {
   name: "reshape"
   type: "Reshape"
-  bottom: "ip2"
+  bottom: "ip3"
   top: "reshape"
   reshape_param {
     shape {
 	  dim: -1
-      dim: 64
+      dim: 128
       dim: 8
       dim: 8
     }

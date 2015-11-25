@@ -156,10 +156,10 @@ void main()
     const string baseDir = R"(C:\Code\caffe\caffe-windows\matt\data\)";
     
     //ImageDatabase::makeTestDatabase(baseDir + "circles-train-raw\\", 10000);
-    //ImageDatabase::makeTestDatabase(baseDir + "circles-test-raw\\", 10000);
+    //ImageDatabase::makeTestDatabase(baseDir + "circles-test-raw\\", 500);
 
     ParticleSystem::makeDatabase(baseDir + "particles-train-raw\\", 10000);
-    ParticleSystem::makeDatabase(baseDir + "particles-test-raw\\", 10000);
+    ParticleSystem::makeDatabase(baseDir + "particles-test-raw\\", 500);
 
     const string databaseName = "particles";
 

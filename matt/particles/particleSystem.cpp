@@ -23,6 +23,8 @@ void ParticleSystem::init(int particleCount)
         while (p.color.length() < 0.7f)
             p.color = vec3f(r(), r(), r());
 
+        p.color = vec3f(1.0f, 1.0f, 1.0f);
+
         p.radius = avgRadius + s() * radiusVariance;
 
         p.speedBase = avgSpeed + s() * speedVariance;

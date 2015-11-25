@@ -23,6 +23,8 @@ void ParticleSystem::init(int particleCount)
         while (p.color.length() < 0.7f)
             p.color = vec3f(r(), r(), r());
 
+        p.color = vec3f(1.0f, 1.0f, 1.0f);
+
         p.radius = avgRadius + s() * radiusVariance;
 
         p.speedBase = avgSpeed + s() * speedVariance;
@@ -90,17 +92,20 @@ void ParticleSystem::microStep(float deltaT)
 
 void ParticleSystem::render(ColorImageR32G32B32 &image)
 {
-    const float gamma = 2.0f;
+    const float gamma = 1.0f;
     image.setPixels(vec3f::origin);
+
+    const float radiusScale = 4.0f;
     
     for (Particle &p : particles)
     {
         for (auto &pixel : image)
         {
             const float distSq = vec2f::distSq(vec2f((float)pixel.x / (image.getWidth() - 1), (float)pixel.y / (image.getHeight() - 1)), p.position);
-            if (distSq < p.radius * p.radius)
+            const float radius = p.radius * radiusScale;
+            if (distSq < radius * radius)
             {
-                const float ratio = powf(sqrtf(distSq) / p.radius, gamma);
+                const float ratio = powf(sqrtf(distSq) / radius, gamma);
                 pixel.value += p.color * (1.0f - ratio);
             }
         }

@@ -1,7 +1,7 @@
 net: "C:/Code/caffe/caffe-windows/matt/data/autoencoder/particles-autoencoder-net.prototxt"
 test_iter: 1000
 test_interval: 1000
-base_lr: 0.00001
+base_lr: 0.0001
 lr_policy: "step"
 gamma: 0.1
 stepsize: 100000
@@ -12,3 +12,4 @@ weight_decay: 0.0005
 snapshot: 10000
 snapshot_prefix: "C:/Code/caffe/caffe-windows/matt/data/autoencoder/particles"
 solver_mode: GPU
+#type: "AdaGrad"
