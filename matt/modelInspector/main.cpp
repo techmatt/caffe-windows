@@ -1,65 +1,18 @@
 
-#include "mLibInclude.h"
-
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
-
-#include <stdint.h>
-#include <sys/stat.h>
-#include <direct.h>
-
-#include <fstream>  // NOLINT(readability/streams)
-#include <string>
-
-#include "boost/algorithm/string.hpp"
-#include "caffe/caffe.hpp"
-#include "caffe/util/signal_handler.h"
-
-using namespace caffe;  // NOLINT(build/namespaces)
-using namespace google;
-using std::string;
-
-struct BlobInfo
-{
-    BlobInfo() {}
-    BlobInfo(string _name, string _suffix, int _channels) {
-        name = _name;
-        suffix = _suffix;
-        channelsToOutput = _channels;
-    }
-    string name;
-    string suffix;
-    int channelsToOutput;
-
-    caffe::shared_ptr< Blob<float> > data;
-};
-
-ColorImageR8G8B8A8 blobToImage(const caffe::shared_ptr< Blob<float> > &blob, int imageIndex, int channelCount)
-{
-    ColorImageR8G8B8A8 image(blob->width(), blob->height());
-    for (auto &p : image)
-    {
-        for (int channel = 0; channel < channelCount; channel++)
-        {
-            const float *dataStart = blob->cpu_data() + blob->offset(imageIndex, channel, p.x, p.y);
-            const BYTE value = util::boundToByte(*dataStart * 255.0f);
-            p.value[channel] = value;
-        }
-        if (channelCount == 1)
-            p.value[2] = p.value[1] = p.value[0];
-        p.value.a = 255;
-    }
-    return image;
-}
+#include "main.h"
 
 void main(int argc, char** argv)
 {
+    ParameterFile params("parameters.txt");
+
     google::InitGoogleLogging(argv[0]);
     //caffe::GlobalInit(&argc, &argv);
     const string baseDir = R"(C:\Code\caffe\caffe-windows\matt\data\)";
 
     const string outputDir = baseDir + "output/";
+    const string outputDirSim = baseDir + "outputSim/";
     util::makeDirectory(outputDir);
+    util::makeDirectory(outputDirSim);
     
     const bool useGPU = true;
     if (useGPU)
@@ -76,11 +29,18 @@ void main(int argc, char** argv)
         Caffe::set_mode(Caffe::CPU);
     }
 
-    const string pretrainedModelSpec = R"(C:\Code\caffe\caffe-windows\matt\data\autoencoder\simulation-autoencoder-net.prototxt)";
-    const string pretrainedModelParams = R"(C:\Code\caffe\caffe-windows\matt\data\autoencoder\simulation_iter_1305.caffemodel)";
+    const string pretrainedModelSpec = params.readString("pretrainedModelSpec");
+    const string pretrainedModelParams = params.readString("pretrainedModelParams");
 
     caffe::shared_ptr< Net<float> > net(new Net<float>(pretrainedModelSpec, caffe::TEST));
     net->CopyTrainedLayersFrom(pretrainedModelParams);
+
+    SimulationState simulation;
+    simulation.init(net);
+    for (int i = 0; i < 100; i++)
+        simulation.step();
+
+    simulation.save(outputDirSim);
 
     vector<BlobInfo> blobs;
     blobs.push_back(BlobInfo("data", "in", 3));
@@ -103,9 +63,7 @@ void main(int argc, char** argv)
     
     LOG(ERROR) << "Extacting Features";
 
-    Datum datum;
-    const int maxKeyStrLength = 100;
-    char keyStr[maxKeyStrLength];
+    LOG(ERROR) << "Input blob count: " << net->input_blobs().size();
 
     std::vector<Blob<float>*> inputBlobs;
     int imageIndex = 0;
@@ -120,35 +78,13 @@ void main(int argc, char** argv)
         }
         
         const int imageCount = blobs[0].data->num();
-        const float* blobData;
         for (int imageIndex = 0; imageIndex < imageCount; imageIndex++)
         {
             for (const BlobInfo &blob : blobs)
             {
-                auto image = blobToImage(blob.data, imageIndex, blob.channelsToOutput);
+                auto image = helper::blobToImage(blob.data, imageIndex, blob.channelsToOutput);
                 LodePNG::save(image, outputDir + "b" + to_string(batchIndex) + "i" + to_string(imageIndex) + "_" + blob.suffix + ".png");
             }
-
-            /*datum.set_height(featureBlob->height());
-            datum.set_width(featureBlob->width());
-            datum.set_channels(featureBlob->channels());
-            datum.clear_data();
-            datum.clear_float_data();
-            blobData = featureBlob->cpu_data() + featureBlob->offset(n);
-            for (int d = 0; d < dim_features; ++d)
-                datum.add_float_data(blobData[d]);
-            int length = _snprintf(keyStr, maxKeyStrLength, "%010d", imageIndex);
-            
-            string out;
-            CHECK(datum.SerializeToString(&out));
-            transaction->Put(std::string(keyStr, length), out);
-            ++imageIndex;
-            if (imageIndex % 1000 == 0) {
-                transaction->Commit();
-                txns.at(i).reset(feature_dbs.at(i)->NewTransaction());
-                LOG(ERROR) << "Extracted features of " << image_indices[i] <<
-                    " query images for feature blob " << blob_names[i];
-            }*/
         }
     }
 

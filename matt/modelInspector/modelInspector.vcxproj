@@ -83,12 +83,17 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mLibSource.cpp" />
+    <ClCompile Include="simulator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="main.h" />
     <ClInclude Include="mLibInclude.h" />
+    <ClInclude Include="simulator.h" />
+    <ClInclude Include="util.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="extract.txt" />
+    <Text Include="parameters.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\buildVS2013\caffelib\caffelib.vcxproj">

@@ -56,7 +56,7 @@ void ParticleSystem::init(int particleCount, float deltaT)
 
 void ParticleSystem::macroStep()
 {
-    const int steps = 10;
+    const int steps = 15;
     for (int i = 0; i < steps; i++)
         microStep(baseDeltaT / steps);
 }
@@ -67,8 +67,8 @@ void ParticleSystem::microStep(float deltaT)
     const float wallForce = 100.0f;
     const float speedNormFactor = 0.98f;
 
-    const float repulsionRadius = 0.1f;
-    const float repulsionForce = 50.0f;
+    const float repulsionRadius = 0.125f;
+    const float repulsionForce = 70.0f;
 
     for (Particle &p : particles)
     {
@@ -160,7 +160,7 @@ void ParticleSystem::makeDatabase(const string &directory, int imageCount)
 {
     const int size = 82;
     const int particleCount = 10;
-    const float deltaT = 0.01f;
+    const float deltaT = 0.015f;
     
     ColorImageR32G32B32A32 imageHistory(size, size);
     ColorImageR32G32B32A32 imageNext(size, size);
@@ -171,10 +171,13 @@ void ParticleSystem::makeDatabase(const string &directory, int imageCount)
     util::makeDirectory(directory);
     for (int imageIndex = 0; imageIndex < imageCount; imageIndex++)
     {
+        if (imageIndex % 1000 == 0)
+            cout << "Image " << imageIndex << " / " << imageCount << endl;
+
         ParticleSystem system;
         system.init(particleCount, deltaT);
 
-        for (int step = 0; step < 200; step++)
+        for (int step = 0; step < 150; step++)
             system.macroStep();
 
         system.renderChain(imageHistory, imageNext);
@@ -195,7 +198,7 @@ void ParticleSystem::makeDatabase(const string &directory, int imageCount)
             p.value = vec4uc(c, c, c, 255);
         }
 
-        LodePNG::save(imageHistorySave, directory + to_string(imageIndex) + "_input.png");
-        LodePNG::save(imageNextSave, directory + to_string(imageIndex) + "_output.png");
+        LodePNG::save(imageHistorySave, directory + to_string(imageIndex) + "_input.png", true);
+        LodePNG::save(imageNextSave, directory + to_string(imageIndex) + "_output.png", true);
     }
 }

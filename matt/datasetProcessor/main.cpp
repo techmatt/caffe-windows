@@ -209,7 +209,7 @@ void main()
     //ImageDatabase::makeTestDatabase(baseDir + "circles-train-raw\\", 10000);
     //ImageDatabase::makeTestDatabase(baseDir + "circles-test-raw\\", 500);
 
-    ParticleSystem::makeDatabase(baseDir + "simulation-train-raw\\", 10000);
+    ParticleSystem::makeDatabase(baseDir + "simulation-train-raw\\", 50000);
     ParticleSystem::makeDatabase(baseDir + "simulation-test-raw\\", 500);
 
     const string databaseName = "simulation";
