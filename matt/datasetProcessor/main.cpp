@@ -17,15 +17,18 @@ class ImageDatabase
 public:
     struct Entry
     {
-        string filename;
+        string filenameInput;
+        string filenameOutput;
         int label;
     };
 
     static void makeTestDatabase(const string &directory, int imageCount);
 
-    void load(const string &directory);
+    void loadStandard(const string &directory);
+    void loadTargeted(const string &directory);
     void save(const string &directory);
 
+    bool useOutputChannel;
     vec2i dimensions;
     vector<Entry> entries;
 };
@@ -57,20 +60,43 @@ void ImageDatabase::makeTestDatabase(const string &directory, int imageCount)
     }
 }
 
-void ImageDatabase::load(const string &directory)
+void ImageDatabase::loadStandard(const string &directory)
 {
+    useOutputChannel = false;
     entries.clear();
     auto files = Directory::enumerateFilesWithPath(directory, ".png");
     cout << "Loading " << directory << " " << files.size() << " files" << endl;
     for (const string &filename : files)
     {
         Entry entry;
-        entry.filename = filename;
+        entry.filenameInput = filename;
         entry.label = -1;
         entries.push_back(entry);
     }
 
-    const auto image = LodePNG::load(entries[0].filename);
+    const auto image = LodePNG::load(entries[0].filenameInput);
+    dimensions = image.getDimensions();
+}
+
+void ImageDatabase::loadTargeted(const string &directory)
+{
+    useOutputChannel = true;
+    entries.clear();
+    auto files = Directory::enumerateFilesWithPath(directory, ".png");
+    cout << "Loading " << directory << " " << files.size() << " files" << endl;
+    for (const string &filename : files)
+    {
+        if (util::contains(filename, "_input"))
+        {
+            Entry entry;
+            entry.filenameInput = filename;
+            entry.filenameOutput = util::replace(filename, "_input", "_output");
+            entry.label = -1;
+            entries.push_back(entry);
+        }
+    }
+
+    const auto image = LodePNG::load(entries[0].filenameInput);
     dimensions = image.getDimensions();
 }
 
@@ -96,7 +122,9 @@ void ImageDatabase::save(const string &directory)
     
     // Storing to db
     const int pixelCount = dimensions.x * dimensions.y;
-    const int channelCount = 3;
+    
+    int channelCount = useOutputChannel ? 5 : 3;
+
     char* pixelData = new char[pixelCount * channelCount];
 
     int count = 0;
@@ -115,13 +143,36 @@ void ImageDatabase::save(const string &directory)
     {
         const auto &entry = entries[entryIndex];
         
-        auto image = LodePNG::load(entry.filename);
+        auto imageInput = LodePNG::load(entry.filenameInput);
+
         int pIndex = 0;
-        for (int channel = 0; channel < 3; channel++)
+        if (useOutputChannel)
         {
-            for (const auto &p : image)
+            for (int channel = 0; channel < 4; channel++)
             {
-                pixelData[pIndex++] = p.value[channel];
+                for (const auto &p : imageInput)
+                {
+                    pixelData[pIndex++] = p.value[channel];
+                }
+            }
+
+            auto imageOutput = LodePNG::load(entry.filenameOutput);
+            for (int channel = 0; channel < 1; channel++)
+            {
+                for (const auto &p : imageOutput)
+                {
+                    pixelData[pIndex++] = p.value[channel];
+                }
+            }
+        }
+        else
+        {
+            for (int channel = 0; channel < 3; channel++)
+            {
+                for (const auto &p : imageInput)
+                {
+                    pixelData[pIndex++] = p.value[channel];
+                }
             }
         }
 
@@ -158,16 +209,16 @@ void main()
     //ImageDatabase::makeTestDatabase(baseDir + "circles-train-raw\\", 10000);
     //ImageDatabase::makeTestDatabase(baseDir + "circles-test-raw\\", 500);
 
-    ParticleSystem::makeDatabase(baseDir + "particles-train-raw\\", 10000);
-    ParticleSystem::makeDatabase(baseDir + "particles-test-raw\\", 500);
+    ParticleSystem::makeDatabase(baseDir + "simulation-train-raw\\", 1000);
+    ParticleSystem::makeDatabase(baseDir + "simulation-test-raw\\", 500);
 
-    const string databaseName = "particles";
+    const string databaseName = "simulation";
 
     ImageDatabase databaseA;
-    databaseA.load(baseDir + databaseName + "-train-raw\\");
+    databaseA.loadTargeted(baseDir + databaseName + "-train-raw\\");
     databaseA.save(baseDir + databaseName + "-train-leveldb");
 
     ImageDatabase databaseB;
-    databaseB.load(baseDir + databaseName + "-test-raw\\");
+    databaseB.loadTargeted(baseDir + databaseName + "-test-raw\\");
     databaseB.save(baseDir + databaseName + "-test-leveldb");
 }

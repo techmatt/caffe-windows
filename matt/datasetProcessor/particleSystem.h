@@ -14,13 +14,15 @@ struct Particle
 
 struct ParticleSystem
 {
-    void init(int particleCount);
+    void init(int particleCount, float deltaT);
     void microStep(float deltaT);
-    void macroStep(float deltaT);
+    void macroStep();
 
-    void render(ColorImageR32G32B32 &image);
+    void render(ColorImageR32G32B32A32 &image);
+    void renderChain(ColorImageR32G32B32A32 &imageStart, ColorImageR32G32B32A32 &imageEnd);
 
     static void makeDatabase(const string &directory, int imageCount);
 
     vector<Particle> particles;
+    float baseDeltaT;
 };

@@ -19,17 +19,34 @@ using namespace caffe;  // NOLINT(build/namespaces)
 using namespace google;
 using std::string;
 
-ColorImageR8G8B8A8 blobToImage(const caffe::shared_ptr< Blob<float> > &blob, int imageIndex)
+struct BlobInfo
+{
+    BlobInfo() {}
+    BlobInfo(string _name, string _suffix, int _channels) {
+        name = _name;
+        suffix = _suffix;
+        channelsToOutput = _channels;
+    }
+    string name;
+    string suffix;
+    int channelsToOutput;
+
+    caffe::shared_ptr< Blob<float> > data;
+};
+
+ColorImageR8G8B8A8 blobToImage(const caffe::shared_ptr< Blob<float> > &blob, int imageIndex, int channelCount)
 {
     ColorImageR8G8B8A8 image(blob->width(), blob->height());
     for (auto &p : image)
     {
-        for (int channel = 0; channel < 3; channel++)
+        for (int channel = 0; channel < channelCount; channel++)
         {
             const float *dataStart = blob->cpu_data() + blob->offset(imageIndex, channel, p.x, p.y);
             const BYTE value = util::boundToByte(*dataStart * 255.0f);
             p.value[channel] = value;
         }
+        if (channelCount == 1)
+            p.value[2] = p.value[1] = p.value[0];
         p.value.a = 255;
     }
     return image;
@@ -59,14 +76,16 @@ void main(int argc, char** argv)
         Caffe::set_mode(Caffe::CPU);
     }
 
-    const string pretrainedModelSpec = R"(C:\Code\caffe\caffe-windows\matt\data\autoencoder\circle-autoencoder-net.prototxt)";
-    const string pretrainedModelParams = R"(C:\Code\caffe\caffe-windows\matt\data\autoencoder\snapshot_iter_56392.caffemodel)";
+    const string pretrainedModelSpec = R"(C:\Code\caffe\caffe-windows\matt\data\autoencoder\simulation-autoencoder-net.prototxt)";
+    const string pretrainedModelParams = R"(C:\Code\caffe\caffe-windows\matt\data\autoencoder\simulation_iter_1305.caffemodel)";
 
     caffe::shared_ptr< Net<float> > net(new Net<float>(pretrainedModelSpec, caffe::TEST));
     net->CopyTrainedLayersFrom(pretrainedModelParams);
 
-    const string dataBlobName = "data";
-    const string featureBlobName = "deconv3";
+    vector<BlobInfo> blobs;
+    blobs.push_back(BlobInfo("data", "in", 3));
+    blobs.push_back(BlobInfo("f-05", "truth", 1));
+    blobs.push_back(BlobInfo("deconv3", "out", 1));
 
     LOG(ERROR) << "All blobs:";
     for (const string &name : net->blob_names())
@@ -74,11 +93,11 @@ void main(int argc, char** argv)
         LOG(ERROR) << "  " << name;
     }
 
-    CHECK(net->has_blob(dataBlobName))
-        << "Unknown feature blob name " << dataBlobName << " in the network " << pretrainedModelSpec;
-
-    CHECK(net->has_blob(featureBlobName))
-        << "Unknown feature blob name " << featureBlobName << " in the network " << pretrainedModelSpec;
+    for (const BlobInfo &blob : blobs)
+    {
+        CHECK(net->has_blob(blob.name))
+            << "Unknown blob name " << blob.name << " in the network " << pretrainedModelSpec;
+    }
 
     const int minibatchCount = 1;
     
@@ -94,21 +113,21 @@ void main(int argc, char** argv)
     {
         net->Forward(inputBlobs);
 
-        const caffe::shared_ptr< Blob<float> > dataBlob = net->blob_by_name(dataBlobName);
-        const caffe::shared_ptr< Blob<float> > featureBlob = net->blob_by_name(featureBlobName);
-
-        LOG(ERROR) << "data dims: " << dataBlob->width() << "x" << dataBlob->height() << "x" << dataBlob->channels();
-        LOG(ERROR) << "feature dims: " << featureBlob->width() << "x" << featureBlob->height() << "x" << dataBlob->channels();
-
-        int imageCount = featureBlob->num();
+        for (BlobInfo &blob : blobs)
+        {
+            blob.data = net->blob_by_name(blob.name);
+            LOG(ERROR) << blob.name << " dims: " << blob.data->width() << "x" << blob.data->height() << "x" << blob.data->channels();
+        }
+        
+        const int imageCount = blobs[0].data->num();
         const float* blobData;
         for (int imageIndex = 0; imageIndex < imageCount; imageIndex++)
         {
-            auto imageA = blobToImage(dataBlob, imageIndex);
-            auto imageB = blobToImage(featureBlob, imageIndex);
-
-            LodePNG::save(imageA, outputDir + "b" + to_string(batchIndex) + "i" + to_string(imageIndex) + "_in.png");
-            LodePNG::save(imageB, outputDir + "b" + to_string(batchIndex) + "i" + to_string(imageIndex) + "_out.png");
+            for (const BlobInfo &blob : blobs)
+            {
+                auto image = blobToImage(blob.data, imageIndex, blob.channelsToOutput);
+                LodePNG::save(image, outputDir + "b" + to_string(batchIndex) + "i" + to_string(imageIndex) + "_" + blob.suffix + ".png");
+            }
 
             /*datum.set_height(featureBlob->height());
             datum.set_width(featureBlob->width());
