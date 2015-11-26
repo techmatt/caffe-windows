@@ -9,7 +9,6 @@ struct SimulationState
     
     Netf net;
 
-    // history 0 is the current (predicted) image.
-    deque< Grid2<float> > history;
+    SimulationHistory history;
     Grid2<float> debugPrediction;
 };

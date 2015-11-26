@@ -3,11 +3,15 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mLibSource.cpp" />
-    <ClCompile Include="particleSystem.cpp" />
+    <ClCompile Include="..\common\particleSystem.cpp" />
+    <ClCompile Include="..\common\simulationUtil.cpp" />
+    <ClCompile Include="imageDatabase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mLibInclude.h" />
     <ClInclude Include="main.h" />
-    <ClInclude Include="particleSystem.h" />
+    <ClInclude Include="..\common\particleSystem.h" />
+    <ClInclude Include="..\common\simulationUtil.h" />
+    <ClInclude Include="imageDatabase.h" />
   </ItemGroup>
 </Project>

@@ -33,7 +33,7 @@ layer {
   }
   data_param {
     source: "C:/Code/caffe/caffe-windows/matt/data/simulation-test-leveldb"
-    batch_size: 100
+    batch_size: 4
     backend: LEVELDB
   }
 }

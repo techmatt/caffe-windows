@@ -10,14 +10,14 @@ void SimulationState::init(const Netf &_net)
 
     const Blobf dataBlob = net->blob_by_name("data");
 
-    history.clear();
+    history.history.clear();
     for (int historyIndex = 0; historyIndex < 4; historyIndex++)
     {
-        history.push_back(helper::blobToFloatGrid(dataBlob, 0, 3 - historyIndex));
+        history.history.push_back(CaffeUtil::blobToFloatGrid(dataBlob, 0, 3 - historyIndex));
     }
 
     const Blobf outputBlob = net->blob_by_name("deconv3");
-    debugPrediction = helper::blobToFloatGrid(outputBlob, 0, 0);
+    debugPrediction = CaffeUtil::blobToFloatGrid(outputBlob, 0, 0);
 }
 
 void SimulationState::step()
@@ -25,13 +25,13 @@ void SimulationState::step()
     Blobf dataBlob = net->blob_by_name("data");
     for (int channel = 0; channel < 4; channel++)
     {
-        helper::loadFloatGridIntoBlob(history[history.size() - 1 - channel], dataBlob, 0, channel);
+        CaffeUtil::loadFloatGridIntoBlob(history.history[history.history.size() - 1 - channel], dataBlob, 0, channel);
     }
     
-    helper::runNetForward(net, "data");
+    CaffeUtil::runNetForward(net, "data");
 
     const Blobf outputBlob = net->blob_by_name("deconv3");
-    history.push_back(helper::blobToFloatGrid(outputBlob, 0, 0));
+    history.history.push_back(CaffeUtil::blobToFloatGrid(outputBlob, 0, 0));
 }
 
 void SimulationState::save(const string &directory)
@@ -39,9 +39,9 @@ void SimulationState::save(const string &directory)
     auto debugImage = helper::gridToImage(debugPrediction);
     LodePNG::save(debugImage, directory + "debug.png");
 
-    for (int historyIndex = 0; historyIndex < history.size(); historyIndex++)
+    for (int historyIndex = 0; historyIndex < history.history.size(); historyIndex++)
     {
-        auto image = helper::gridToImage(history[historyIndex]);
+        auto image = helper::gridToImage(history.history[historyIndex]);
         LodePNG::save(image, directory + to_string(historyIndex) + "_predicted.png");
     }
 }

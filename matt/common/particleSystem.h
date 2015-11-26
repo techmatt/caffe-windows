@@ -18,10 +18,12 @@ struct ParticleSystem
     void microStep(float deltaT);
     void macroStep();
 
-    void render(ColorImageR32G32B32A32 &image);
+    void render(Grid2<float> &imageOut);
     void renderChain(ColorImageR32G32B32A32 &imageStart, ColorImageR32G32B32A32 &imageEnd);
 
     static void makeDatabase(const string &directory, int imageCount);
+    static SimulationHistory makeSimulation(int frameCount);
+    static SimulationHistories makeSimulations(int frameCount);
 
     vector<Particle> particles;
     float baseDeltaT;

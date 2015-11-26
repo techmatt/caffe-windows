@@ -11,6 +11,8 @@ void main(int argc, char** argv)
 
     const string outputDir = baseDir + "output/";
     const string outputDirSim = baseDir + "outputSim/";
+    const string outputDirVideo = baseDir + "videos/predictedSimulations/";
+
     util::makeDirectory(outputDir);
     util::makeDirectory(outputDirSim);
     
@@ -35,12 +37,22 @@ void main(int argc, char** argv)
     caffe::shared_ptr< Net<float> > net(new Net<float>(pretrainedModelSpec, caffe::TEST));
     net->CopyTrainedLayersFrom(pretrainedModelParams);
 
-    SimulationState simulation;
-    simulation.init(net);
-    for (int i = 0; i < 100; i++)
-        simulation.step();
+    SimulationHistories histories;
+    const int simulationCount = 15;
+    const int simulationDuration = 20;
+    histories.videoGridDims = vec2i(5, 3);
+    for (int sim = 0; sim < simulationCount; sim++)
+    {
+        LOG(ERROR) << "Running simulation " << sim;
+        SimulationState simulation;
+        simulation.init(net);
+        for (int i = 0; i < simulationDuration; i++)
+            simulation.step();
 
-    simulation.save(outputDirSim);
+        histories.histories.push_back(simulation.history);
+        //simulation.save(outputDirSim);
+    }
+    histories.saveVideoFrames(outputDirVideo);
 
     vector<BlobInfo> blobs;
     blobs.push_back(BlobInfo("data", "in", 3));
@@ -82,7 +94,7 @@ void main(int argc, char** argv)
         {
             for (const BlobInfo &blob : blobs)
             {
-                auto image = helper::blobToImage(blob.data, imageIndex, blob.channelsToOutput);
+                auto image = CaffeUtil::blobToImage(blob.data, imageIndex, blob.channelsToOutput);
                 LodePNG::save(image, outputDir + "b" + to_string(batchIndex) + "i" + to_string(imageIndex) + "_" + blob.suffix + ".png");
             }
         }

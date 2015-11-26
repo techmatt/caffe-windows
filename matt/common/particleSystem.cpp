@@ -112,23 +112,23 @@ void ParticleSystem::microStep(float deltaT)
     }
 }
 
-void ParticleSystem::render(ColorImageR32G32B32A32 &image)
+void ParticleSystem::render(Grid2<float> &imageOut)
 {
     const float gamma = 1.0f;
-    image.setPixels(vec4f::origin);
+    imageOut.setValues(0.0f);
 
     const float radiusScale = 1.0f;
     
     for (Particle &p : particles)
     {
-        for (auto &pixel : image)
+        for (auto &pixel : imageOut)
         {
-            const float distSq = vec2f::distSq(vec2f((float)pixel.x / (image.getWidth() - 1), (float)pixel.y / (image.getHeight() - 1)), p.position);
+            const float distSq = vec2f::distSq(vec2f((float)pixel.x / (imageOut.getDimX() - 1), (float)pixel.y / (imageOut.getDimY() - 1)), p.position);
             const float radius = p.radius * radiusScale;
             if (distSq < radius * radius)
             {
                 const float ratio = powf(sqrtf(distSq) / radius, gamma);
-                pixel.value += vec4f(p.color * (1.0f - ratio), 0.0f);
+                pixel.value += p.color.r * (1.0f - ratio);
             }
         }
     }
@@ -136,7 +136,7 @@ void ParticleSystem::render(ColorImageR32G32B32A32 &image)
 
 void ParticleSystem::renderChain(ColorImageR32G32B32A32 &imageHistory, ColorImageR32G32B32A32 &imageNext)
 {
-    ColorImageR32G32B32A32 storage(imageHistory.getWidth(), imageHistory.getHeight());
+    Grid2<float> storage(imageHistory.getWidth(), imageHistory.getHeight());
     for (int history = 0; history < 4; history++)
     {
         int channel = 3 - history;
@@ -144,7 +144,7 @@ void ParticleSystem::renderChain(ColorImageR32G32B32A32 &imageHistory, ColorImag
         render(storage);
         for (auto &p : imageHistory)
         {
-            p.value[channel] = storage(p.x, p.y).x;
+            p.value[channel] = storage(p.x, p.y);
         }
         macroStep();
     }
@@ -152,21 +152,21 @@ void ParticleSystem::renderChain(ColorImageR32G32B32A32 &imageHistory, ColorImag
     render(storage);
     for (auto &p : imageNext)
     {
-        p.value[0] = storage(p.x, p.y).x;
+        p.value[0] = storage(p.x, p.y);
     }
 }
 
 void ParticleSystem::makeDatabase(const string &directory, int imageCount)
 {
-    const int size = 82;
+    const int imageSize = 82;
     const int particleCount = 10;
     const float deltaT = 0.015f;
     
-    ColorImageR32G32B32A32 imageHistory(size, size);
-    ColorImageR32G32B32A32 imageNext(size, size);
+    ColorImageR32G32B32A32 imageHistory(imageSize, imageSize);
+    ColorImageR32G32B32A32 imageNext(imageSize, imageSize);
     
-    ColorImageR8G8B8A8 imageHistorySave(size, size);
-    ColorImageR8G8B8A8 imageNextSave(size, size);
+    ColorImageR8G8B8A8 imageHistorySave(imageSize, imageSize);
+    ColorImageR8G8B8A8 imageNextSave(imageSize, imageSize);
 
     util::makeDirectory(directory);
     for (int imageIndex = 0; imageIndex < imageCount; imageIndex++)
@@ -201,4 +201,43 @@ void ParticleSystem::makeDatabase(const string &directory, int imageCount)
         LodePNG::save(imageHistorySave, directory + to_string(imageIndex) + "_input.png", true);
         LodePNG::save(imageNextSave, directory + to_string(imageIndex) + "_output.png", true);
     }
+}
+
+SimulationHistory ParticleSystem::makeSimulation(int frameCount)
+{
+    const int imageSize = 82;
+    cout << "Making simulation with " << frameCount << " frames" << endl;
+    SimulationHistory result;
+    const int particleCount = 10;
+    const float deltaT = 0.015f;
+
+    ParticleSystem system;
+    system.init(particleCount, deltaT);
+    
+    for (int step = 0; step < 150; step++)
+        system.macroStep();
+
+    for (int frameIndex = 0; frameIndex < frameCount; frameIndex++)
+    {
+        system.macroStep();
+        Grid2<float> image(imageSize, imageSize);
+        system.render(image);
+        result.history.push_back(image);
+    }
+
+    return result;
+}
+
+SimulationHistories ParticleSystem::makeSimulations(int frameCount)
+{
+    SimulationHistories result;
+    result.videoGridDims = vec2i(5, 3);
+    
+    const int simulationCount = result.videoGridDims.x * result.videoGridDims.y;
+
+    for (int i = 0; i < simulationCount; i++)
+    {
+        result.histories.push_back(makeSimulation(frameCount));
+    }
+    return result;
 }

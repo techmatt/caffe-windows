@@ -1,4 +1,7 @@
 
 #include "mLibInclude.h"
 
-#include "particleSystem.h"
+#include "imageDatabase.h"
+
+#include "../common/simulationUtil.h"
+#include "../common/particleSystem.h"

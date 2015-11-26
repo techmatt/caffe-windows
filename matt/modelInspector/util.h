@@ -17,7 +17,7 @@ struct BlobInfo
     Blobf data;
 };
 
-struct helper
+struct CaffeUtil
 {
     static ColorImageR8G8B8A8 blobToImage(const Blobf &blob, int imageIndex, int channelCount)
     {
@@ -33,17 +33,6 @@ struct helper
             if (channelCount == 1)
                 p.value[2] = p.value[1] = p.value[0];
             p.value.a = 255;
-        }
-        return image;
-    }
-
-    static ColorImageR8G8B8A8 gridToImage(const Grid2<float> &grid)
-    {
-        ColorImageR8G8B8A8 image(grid.getDimX(), grid.getDimY());
-        for (auto &p : image)
-        {
-            const BYTE value = util::boundToByte(grid(p.x, p.y) * 255.0f);
-            p.value = vec4uc(value, value, value, 255);
         }
         return image;
     }

@@ -19,4 +19,5 @@ using namespace caffe;  // NOLINT(build/namespaces)
 using namespace google;
 
 #include "util.h"
+#include "../common/simulationUtil.h"
 #include "simulator.h"
