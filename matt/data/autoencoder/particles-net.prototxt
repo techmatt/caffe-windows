@@ -1,4 +1,4 @@
-name: "CircleAutoencoder"
+name: "CloudsSimulation"
 
 layer {
   name: "data"
@@ -14,7 +14,7 @@ layer {
   }
   data_param {
     source: "C:/Code/caffe/caffe-windows/matt/data/particles-train-leveldb"
-    batch_size: 100
+    batch_size: 50
     backend: LEVELDB
   }
 }
@@ -33,15 +33,85 @@ layer {
   }
   data_param {
     source: "C:/Code/caffe/caffe-windows/matt/data/particles-test-leveldb"
-    batch_size: 100
+    batch_size: 4
     backend: LEVELDB
+  }
+}
+
+layer {
+  name: "slicer"
+  type: "Slice"
+  bottom: "data"
+  
+  top: "f-1r"
+  top: "f-1g"
+  top: "f-1b"
+  
+  top: "f-2r"
+  top: "f-2g"
+  top: "f-2b"
+  
+  top: "f-3r"
+  top: "f-3g"
+  top: "f-3b"
+  
+  top: "f-4r"
+  top: "f-4g"
+  top: "f-4b"
+  
+  top: "f-5r"
+  top: "f-5g"
+  top: "f-5b"
+  
+  slice_param {
+    axis: 1
+  }
+}
+
+layer {
+  name: "mergerA"
+  type: "Concat"
+  
+  bottom: "f-1r"
+  bottom: "f-1g"
+  bottom: "f-1b"
+  
+  bottom: "f-2r"
+  bottom: "f-2g"
+  bottom: "f-2b"
+  
+  bottom: "f-3r"
+  bottom: "f-3g"
+  bottom: "f-3b"
+  
+  bottom: "f-4r"
+  bottom: "f-4g"
+  bottom: "f-4b"
+  
+  top: "input"
+  concat_param {
+    axis: 1
+  }
+}
+
+layer {
+  name: "mergerB"
+  type: "Concat"
+  
+  bottom: "f-5r"
+  bottom: "f-5g"
+  bottom: "f-5b"
+  
+  top: "targetImage"
+  concat_param {
+    axis: 1
   }
 }
 
 layer {
   name: "conv1"
   type: "Convolution"
-  bottom: "data"
+  bottom: "input"
   top: "conv1"
   param {
     lr_mult: 1
@@ -201,7 +271,7 @@ layer {
     lr_mult: 2
   }
   inner_product_param {
-    num_output: 8192
+    num_output: 16384
     weight_filler {
       type: "xavier"
     }
@@ -226,9 +296,9 @@ layer {
   reshape_param {
     shape {
 	  dim: -1
-      dim: 128
-      dim: 8
-      dim: 8
+      dim: 64
+      dim: 16
+      dim: 16
     }
   }
 }
@@ -248,8 +318,8 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
-    stride: 2
+    num_output: 256
+    stride: 1
     weight_filler {
       type: "xavier"
     }
@@ -282,13 +352,13 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     stride: 2
     weight_filler {
       type: "xavier"
     }
-    pad_h: 1
-    pad_w: 1
+    pad_h: 2
+    pad_w: 2
     kernel_h: 6
     kernel_w: 6
   }
@@ -332,6 +402,6 @@ layer {
   name: "loss"
   type: "EuclideanLoss"
   bottom: "deconv3"
-  bottom: "data"
+  bottom: "targetImage"
   top: "loss"
 }

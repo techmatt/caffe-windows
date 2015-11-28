@@ -1,2 +1,2 @@
-caffe train --solver=particles-autoencoder-solver.prototxt
+caffe train --solver=particles-solver.prototxt
 pause

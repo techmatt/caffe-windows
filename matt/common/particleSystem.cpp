@@ -1,6 +1,17 @@
 
 #include "main.h"
 
+#include <leveldb/db.h>
+#include <leveldb/write_batch.h>
+
+#include <stdint.h>
+#include <sys/stat.h>
+#include <direct.h>
+
+#include "caffe/proto/caffe.pb.h"
+
+using namespace caffe;
+
 void ParticleSystem::init(int particleCount, float deltaT)
 {
     baseDeltaT = deltaT;
@@ -15,6 +26,7 @@ void ParticleSystem::init(int particleCount, float deltaT)
 
     auto r = []() { return util::randomUniform(0.0f, 1.0f);  };
     auto s = []() { return util::randomUniform(-1.0f, 1.0f);  };
+    auto t = [](float a, float b) { return util::randomUniform(a, b);  };
 
     vector<vec3f> colorList;
     colorList.push_back(vec3f(1.0f, 1.0f, 1.0f));
@@ -39,9 +51,9 @@ void ParticleSystem::init(int particleCount, float deltaT)
         p.position = vec2f(r(), r());
         p.forces = vec2f::origin;
 
-        //p.color = vec3f(r(), r(), r());
-        //while (p.color.length() < 0.7f)
-        //    p.color = vec3f(r(), r(), r());
+        p.color = vec3f(t(0.5f, 1.0f), t(0.5f, 1.0f), t(0.5f, 1.0f));
+        while (p.color.length() < 1.0f)
+            p.color = vec3f(t(0.5f, 1.0f), t(0.5f, 1.0f), t(0.5f, 1.0f));
         p.color = vec3f(1.0f, 1.0f, 1.0f);
 
         //p.color = colorList[colorIndex++];
@@ -128,41 +140,104 @@ void ParticleSystem::render(Grid2<vec3f> &imageOut)
             if (distSq < radius * radius)
             {
                 const float ratio = powf(sqrtf(distSq) / radius, gamma);
-                pixel.value += p.color.r * (1.0f - ratio);
+                pixel.value += p.color * (1.0f - ratio);
             }
         }
     }
 }
 
-void ParticleSystem::renderChain(ColorImageR32G32B32A32 &imageHistory, ColorImageR32G32B32A32 &imageNext)
-{
-    /*Grid2<vec3f> storage(imageHistory.getWidth(), imageHistory.getHeight());
-    for (int history = 0; history < 4; history++)
-    {
-        int channel = 3 - history;
-        
-        render(storage);
-        for (auto &p : imageHistory)
-        {
-            p.value[channel] = storage(p.x, p.y);
-        }
-        macroStep();
-    }
-
-    render(storage);
-    for (auto &p : imageNext)
-    {
-        p.value[0] = storage(p.x, p.y);
-    }*/
-}
-
-void ParticleSystem::makeDatabase(const string &directory, int imageCount)
+void ParticleSystem::makeDatabase(const string &databaseDir, int sampleCount)
 {
     const int imageSize = 82;
     const int particleCount = 10;
     const float deltaT = 0.015f;
     
-    ColorImageR32G32B32A32 imageHistory(imageSize, imageSize);
+    const int historyFrames = 4;
+    const int imageChannelCount = 3;
+
+    const int totalFrames = historyFrames + 1;
+    const int totalChannelCount = imageChannelCount * totalFrames;
+    const int pixelCount = imageSize * imageSize;
+
+    // leveldb
+    leveldb::DB* db;
+    leveldb::Options options;
+    options.error_if_exists = true;
+    options.create_if_missing = true;
+    options.write_buffer_size = 268435456;
+    leveldb::WriteBatch* batch = NULL;
+
+    // Open db
+    cout << "Opening leveldb " << databaseDir << endl;
+    leveldb::Status status = leveldb::DB::Open(options, databaseDir, &db);
+    if (!status.ok())
+    {
+        cout << "Failed to open " << databaseDir << " or it already exists" << endl;
+        return;
+    }
+    batch = new leveldb::WriteBatch();
+
+    // Storing to db
+    char* rawData = new char[pixelCount * totalChannelCount];
+
+    int count = 0;
+    const int kMaxKeyLength = 10;
+    char key_cstr[kMaxKeyLength];
+    string value;
+
+    Datum datum;
+    datum.set_channels(totalChannelCount);
+    datum.set_height(imageSize);
+    datum.set_width(imageSize);
+
+    ColorImageR8G8B8A8 dummyImage(imageSize, imageSize);
+
+    cout << "A total of " << sampleCount << " samples will be generated." << endl;
+    for (int sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++)
+    {
+        if (sampleIndex % 1000 == 0)
+            cout << "Sample " << sampleIndex << " / " << sampleCount << endl;
+
+        SimulationHistory history = ParticleSystem::makeSimulation(totalFrames);
+
+        int pIndex = 0;
+        for (int frameIndex = 0; frameIndex < totalFrames; frameIndex++)
+        {
+            for (int channel = 0; channel < 3; channel++)
+            {
+                for (const auto &p : dummyImage)
+                {
+                    rawData[pIndex++] = util::boundToByte(history.history[frameIndex](p.x, p.y)[channel] * 255.0f);
+                }
+            }
+        }
+
+        datum.set_data(rawData, pixelCount * totalChannelCount);
+        datum.set_label(0);
+
+        sprintf_s(key_cstr, kMaxKeyLength, "%08d", sampleIndex);
+        datum.SerializeToString(&value);
+        string keystr(key_cstr);
+
+        // Put in db
+        batch->Put(keystr, value);
+
+        if (++count % 1000 == 0) {
+            // Commit txn
+            db->Write(leveldb::WriteOptions(), batch);
+            delete batch;
+            batch = new leveldb::WriteBatch();
+        }
+    }
+    // write the last batch
+    if (count % 1000 != 0) {
+        db->Write(leveldb::WriteOptions(), batch);
+    }
+    delete batch;
+    delete db;
+    cout << "Processed " << count << " files." << endl;
+
+    /*ColorImageR32G32B32A32 imageHistory(imageSize, imageSize);
     ColorImageR32G32B32A32 imageNext(imageSize, imageSize);
     
     ColorImageR8G8B8A8 imageHistorySave(imageSize, imageSize);
@@ -200,13 +275,13 @@ void ParticleSystem::makeDatabase(const string &directory, int imageCount)
 
         LodePNG::save(imageHistorySave, directory + to_string(imageIndex) + "_input.png", true);
         LodePNG::save(imageNextSave, directory + to_string(imageIndex) + "_output.png", true);
-    }
+    }*/
 }
 
 SimulationHistory ParticleSystem::makeSimulation(int frameCount)
 {
     const int imageSize = 82;
-    cout << "Making simulation with " << frameCount << " frames" << endl;
+    //cout << "Making simulation with " << frameCount << " frames" << endl;
     SimulationHistory result;
     const int particleCount = 10;
     const float deltaT = 0.015f;

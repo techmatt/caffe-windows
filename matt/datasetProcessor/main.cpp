@@ -44,8 +44,10 @@ void main()
     //helper::processVideoFolder(R"(C:\Code\caffe\caffe-windows\matt\data\cloudsRaw\)", R"(C:\Code\caffe\caffe-windows\matt\data\cloudsProcessed\)", bbox2i(vec2i(3, 63), vec2i(476, 295)), 1);
     //helper::videoToSamples(R"(C:\Code\caffe\caffe-windows\matt\data\cloudsProcessed\)", R"(C:\Code\caffe\caffe-windows\matt\data\clouds-train-raw\)", 82, 50000);
     //helper::videoToSamples(R"(C:\Code\caffe\caffe-windows\matt\data\cloudsProcessed\)", R"(C:\Code\caffe\caffe-windows\matt\data\clouds-test-raw\)", 82, 500);
-    helper::videoToDatabase(baseDir + "cloudsProcessed/", baseDir + "clouds-train-leveldb", vec2i(82, 82), 20000);
-    helper::videoToDatabase(baseDir + "cloudsProcessed/", baseDir + "clouds-test-leveldb", vec2i(82, 82), 500);
+    //helper::videoToDatabase(baseDir + "cloudsProcessed/", baseDir + "clouds-train-leveldb", vec2i(82, 82), 20000);
+    //helper::videoToDatabase(baseDir + "cloudsProcessed/", baseDir + "clouds-test-leveldb", vec2i(82, 82), 500);
+    ParticleSystem::makeDatabase(baseDir + "particles-train-leveldb", 20000);
+    ParticleSystem::makeDatabase(baseDir + "particles-test-leveldb", 500);
 
     
     //makeSimulationVideo();

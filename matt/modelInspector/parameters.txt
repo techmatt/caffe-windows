@@ -1,8 +1,8 @@
 
-#pretrainedModelSpec=C:\Code\caffe\caffe-windows\matt\data\autoencoder\simulation-autoencoder-net.prototxt
+pretrainedModelSpec=C:\Code\caffe\caffe-windows\matt\data\autoencoder\particles-net.prototxt
+pretrainedModelParams=C:\Code\caffe\caffe-windows\matt\data\autoencoder\particles_iter_758.caffemodel
+
+#pretrainedModelSpec=C:\Code\caffe\caffe-windows\matt\data\autoencoder\clouds-netA.prototxt
 #pretrainedModelParams=C:\Code\caffe\caffe-windows\matt\data\autoencoder\clouds_iter_565.caffemodel
 
-pretrainedModelSpec=C:\Code\caffe\caffe-windows\matt\data\autoencoder\clouds-netA.prototxt
-pretrainedModelParams=C:\Code\caffe\caffe-windows\matt\data\autoencoder\clouds_iter_565.caffemodel
-
-meanFile=C:\Code\caffe\caffe-windows\matt\data\clouds-mean.binaryproto
+meanFile=C:\Code\caffe\caffe-windows\matt\data\particles-mean.binaryproto

@@ -19,9 +19,8 @@ struct ParticleSystem
     void macroStep();
 
     void render(Grid2<vec3f> &imageOut);
-    void renderChain(ColorImageR32G32B32A32 &imageStart, ColorImageR32G32B32A32 &imageEnd);
-
-    static void makeDatabase(const string &directory, int imageCount);
+    
+    static void makeDatabase(const string &databaseDir, int sampleCount);
     static SimulationHistory makeSimulation(int frameCount);
     static SimulationHistories makeSimulations(int frameCount);
 
