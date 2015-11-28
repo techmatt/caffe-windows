@@ -9,13 +9,16 @@ void main(int argc, char** argv)
     //caffe::GlobalInit(&argc, &argv);
     const string baseDir = R"(C:\Code\caffe\caffe-windows\matt\data\)";
 
-    const string outputDir = baseDir + "output/";
-    const string outputDirSim = baseDir + "outputSim/";
-    const string outputDirVideo = baseDir + "videos/predictedSimulations/";
+    const string outputDirSingleFrame = baseDir + "outputFrames/";
+    const string outputDirAnimation = baseDir + "outputAnimation/";
+    const string outputDirCompiledVideo = baseDir + "videos/predictedClouds/";
 
-    util::makeDirectory(outputDir);
-    util::makeDirectory(outputDirSim);
+    util::makeDirectory(outputDirSingleFrame);
+    util::makeDirectory(outputDirAnimation);
+    util::makeDirectory(outputDirCompiledVideo);
     
+    Grid2<vec3f> meanValues = CaffeUtil::gridVec3FromBinaryProto(params.readString("meanFile"));
+
     const bool useGPU = true;
     if (useGPU)
     {
@@ -39,7 +42,7 @@ void main(int argc, char** argv)
 
     SimulationHistories histories;
     const int simulationCount = 15;
-    const int simulationDuration = 20;
+    const int simulationDuration = 200;
     histories.videoGridDims = vec2i(5, 3);
     for (int sim = 0; sim < simulationCount; sim++)
     {
@@ -50,13 +53,17 @@ void main(int argc, char** argv)
             simulation.step();
 
         histories.histories.push_back(simulation.history);
-        //simulation.save(outputDirSim);
-    }
-    histories.saveVideoFrames(outputDirVideo);
 
-    vector<BlobInfo> blobs;
+        if (sim == 2)
+        {
+            simulation.save(outputDirAnimation, meanValues);
+        }
+    }
+    histories.saveVideoFrames(outputDirCompiledVideo, meanValues);
+
+    /*vector<BlobInfo> blobs;
     blobs.push_back(BlobInfo("data", "in", 3));
-    blobs.push_back(BlobInfo("f-05", "truth", 1));
+    blobs.push_back(BlobInfo("targetImage", "truth", 3));
     blobs.push_back(BlobInfo("deconv3", "out", 1));
 
     LOG(ERROR) << "All blobs:";
@@ -94,11 +101,11 @@ void main(int argc, char** argv)
         {
             for (const BlobInfo &blob : blobs)
             {
-                auto image = CaffeUtil::blobToImage(blob.data, imageIndex, blob.channelsToOutput);
-                LodePNG::save(image, outputDir + "b" + to_string(batchIndex) + "i" + to_string(imageIndex) + "_" + blob.suffix + ".png");
+                auto image = CaffeUtil::blobToImage(blob.data, imageIndex, blob.channelsToOutput, meanValues);
+                LodePNG::save(image, outputDirSingleFrame + "b" + to_string(batchIndex) + "i" + to_string(imageIndex) + "_" + blob.suffix + ".png");
             }
         }
     }
 
-    LOG(ERROR) << "Successfully extracted the features!";
+    LOG(ERROR) << "Successfully extracted the features!";*/
 }

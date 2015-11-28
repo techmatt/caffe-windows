@@ -10,7 +10,7 @@
 
 #include "caffe/proto/caffe.pb.h"
 
-using namespace caffe;  // NOLINT(build/namespaces)
+using namespace caffe;
 
 void ImageDatabase::makeTestDatabase(const string &directory, int imageCount)
 {

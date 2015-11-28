@@ -13,35 +13,36 @@ void SimulationState::init(const Netf &_net)
     history.history.clear();
     for (int historyIndex = 0; historyIndex < 4; historyIndex++)
     {
-        history.history.push_back(CaffeUtil::blobToFloatGrid(dataBlob, 0, 3 - historyIndex));
+        history.history.push_back(CaffeUtil::blobToGridVec3(*dataBlob.get(), 0, 3 * historyIndex));
     }
 
     const Blobf outputBlob = net->blob_by_name("deconv3");
-    debugPrediction = CaffeUtil::blobToFloatGrid(outputBlob, 0, 0);
+    debugPrediction = CaffeUtil::blobToGridVec3(*outputBlob.get(), 0, 0);
 }
 
 void SimulationState::step()
 {
     Blobf dataBlob = net->blob_by_name("data");
-    for (int channel = 0; channel < 4; channel++)
+    for (int historyIndex = 0; historyIndex < 4; historyIndex++)
     {
-        CaffeUtil::loadFloatGridIntoBlob(history.history[history.history.size() - 1 - channel], dataBlob, 0, channel);
+        // TODO: vertify the direction is correct...
+        CaffeUtil::loadGridVec3IntoBlob(history.history[history.history.size() - 1 - historyIndex], dataBlob, 0, 9 - 3 * historyIndex);
     }
     
     CaffeUtil::runNetForward(net, "data");
 
     const Blobf outputBlob = net->blob_by_name("deconv3");
-    history.history.push_back(CaffeUtil::blobToFloatGrid(outputBlob, 0, 0));
+    history.history.push_back(CaffeUtil::blobToGridVec3(*outputBlob.get(), 0, 0));
 }
 
-void SimulationState::save(const string &directory)
+void SimulationState::save(const string &directory, const Grid2<vec3f> &meanValues)
 {
-    auto debugImage = helper::gridToImage(debugPrediction);
+    auto debugImage = helper::gridToImage(debugPrediction, meanValues);
     LodePNG::save(debugImage, directory + "debug.png");
 
     for (int historyIndex = 0; historyIndex < history.history.size(); historyIndex++)
     {
-        auto image = helper::gridToImage(history.history[historyIndex]);
-        LodePNG::save(image, directory + to_string(historyIndex) + "_predicted.png");
+        auto image = helper::gridToImage(history.history[historyIndex], meanValues);
+        LodePNG::save(image, directory + to_string(historyIndex) + "_sim.png");
     }
 }

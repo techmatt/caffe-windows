@@ -112,10 +112,10 @@ void ParticleSystem::microStep(float deltaT)
     }
 }
 
-void ParticleSystem::render(Grid2<float> &imageOut)
+void ParticleSystem::render(Grid2<vec3f> &imageOut)
 {
     const float gamma = 1.0f;
-    imageOut.setValues(0.0f);
+    imageOut.setValues(vec3f::origin);
 
     const float radiusScale = 1.0f;
     
@@ -136,7 +136,7 @@ void ParticleSystem::render(Grid2<float> &imageOut)
 
 void ParticleSystem::renderChain(ColorImageR32G32B32A32 &imageHistory, ColorImageR32G32B32A32 &imageNext)
 {
-    Grid2<float> storage(imageHistory.getWidth(), imageHistory.getHeight());
+    /*Grid2<vec3f> storage(imageHistory.getWidth(), imageHistory.getHeight());
     for (int history = 0; history < 4; history++)
     {
         int channel = 3 - history;
@@ -153,7 +153,7 @@ void ParticleSystem::renderChain(ColorImageR32G32B32A32 &imageHistory, ColorImag
     for (auto &p : imageNext)
     {
         p.value[0] = storage(p.x, p.y);
-    }
+    }*/
 }
 
 void ParticleSystem::makeDatabase(const string &directory, int imageCount)
@@ -220,7 +220,7 @@ SimulationHistory ParticleSystem::makeSimulation(int frameCount)
     for (int frameIndex = 0; frameIndex < frameCount; frameIndex++)
     {
         system.macroStep();
-        Grid2<float> image(imageSize, imageSize);
+        Grid2<vec3f> image(imageSize, imageSize);
         system.render(image);
         result.history.push_back(image);
     }

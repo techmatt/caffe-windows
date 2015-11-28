@@ -1,0 +1,4 @@
+ffmpeg -i %d.png -c:v libx264 output.mp4
+
+ffmpeg -i fireARaw.mp4 -ss 00:02:13.0 -c copy -t 00:00:12.0 -c:v libx264 output.mp4
+ffmpeg -i fireARaw.mp4 -ss 00:02:26.0 -c copy -t 00:00:10.0 -c:v libx264 output.mp4
