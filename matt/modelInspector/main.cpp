@@ -9,11 +9,9 @@ void main(int argc, char** argv)
     //caffe::GlobalInit(&argc, &argv);
     const string baseDir = R"(C:\Code\caffe\caffe-windows\matt\data\)";
 
-    const string outputDirSingleFrame = baseDir + "outputFrames/";
-    const string outputDirAnimation = baseDir + "outputAnimation/";
-    const string outputDirCompiledVideo = baseDir + "videos/predictedClouds/";
+    const string outputDirAnimation = R"(C:\Code\caffe\caffe-windows\matt\debug\)";
+    const string outputDirCompiledVideo = baseDir + "videos/predictionVideo/";
 
-    util::makeDirectory(outputDirSingleFrame);
     util::makeDirectory(outputDirAnimation);
     util::makeDirectory(outputDirCompiledVideo);
     
@@ -42,7 +40,7 @@ void main(int argc, char** argv)
 
     SimulationHistories histories;
     const int simulationCount = 15;
-    const int simulationDuration = 200;
+    const int simulationDuration = 1000;
     histories.videoGridDims = vec2i(5, 3);
     for (int sim = 0; sim < simulationCount; sim++)
     {
@@ -54,7 +52,7 @@ void main(int argc, char** argv)
 
         histories.histories.push_back(simulation.history);
 
-        if (sim == 2)
+        if (sim == 0)
         {
             simulation.save(outputDirAnimation, meanValues);
         }

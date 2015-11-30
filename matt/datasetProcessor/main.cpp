@@ -23,31 +23,26 @@ void generateSimulationDatabase()
     ParticleSystem::makeDatabase(baseDir + "simulation-test-raw\\", 500);
 }
 
-void compileDatabase(const string &databaseName)
-{
-    cout << "Compiling database..." << endl;
-
-    ImageDatabase databaseA;
-    databaseA.loadTargeted(baseDir + databaseName + "-train-raw\\");
-    databaseA.save(baseDir + databaseName + "-train-leveldb");
-
-    ImageDatabase databaseB;
-    databaseB.loadTargeted(baseDir + databaseName + "-test-raw\\");
-    databaseB.save(baseDir + databaseName + "-test-leveldb");
-}
-
 void main()
 {
-    //const string databaseName = "simulation";
-    const string databaseName = "clouds";
-
     //helper::processVideoFolder(R"(C:\Code\caffe\caffe-windows\matt\data\cloudsRaw\)", R"(C:\Code\caffe\caffe-windows\matt\data\cloudsProcessed\)", bbox2i(vec2i(3, 63), vec2i(476, 295)), 1);
-    //helper::videoToSamples(R"(C:\Code\caffe\caffe-windows\matt\data\cloudsProcessed\)", R"(C:\Code\caffe\caffe-windows\matt\data\clouds-train-raw\)", 82, 50000);
-    //helper::videoToSamples(R"(C:\Code\caffe\caffe-windows\matt\data\cloudsProcessed\)", R"(C:\Code\caffe\caffe-windows\matt\data\clouds-test-raw\)", 82, 500);
+    //helper::processVideoFolder(baseDir + "videos/fireBRaw/", baseDir + "videos/fireBProcessed/", bbox2i(vec2i(100, 1), vec2i(1278, 392)), 1);
+    //helper::processVideoFolder(baseDir + "videos/fireARaw/", baseDir + "videos/fireAProcessed/", bbox2i(vec2i(100, 1), vec2i(1278, 392)), 1);
+
     //helper::videoToDatabase(baseDir + "cloudsProcessed/", baseDir + "clouds-train-leveldb", vec2i(82, 82), 20000);
     //helper::videoToDatabase(baseDir + "cloudsProcessed/", baseDir + "clouds-test-leveldb", vec2i(82, 82), 500);
-    ParticleSystem::makeDatabase(baseDir + "particles-train-leveldb", 20000);
-    ParticleSystem::makeDatabase(baseDir + "particles-test-leveldb", 500);
+
+    //helper::videoToDatabase(baseDir + "videos/fireBProcessed/", baseDir + "fireB-train-leveldb", vec2i(82, 82), 20000);
+    //helper::videoToDatabase(baseDir + "videos/fireBProcessed/", baseDir + "fireB-test-leveldb", vec2i(82, 82), 500);
+
+    //helper::videoToDatabase(baseDir + "videos/fireAProcessed/", baseDir + "fireA-train-leveldb", vec2i(82, 82), 20000);
+    //helper::videoToDatabase(baseDir + "videos/fireAProcessed/", baseDir + "fireA-test-leveldb", vec2i(82, 82), 500);
+
+    helper::videoToDatabase(baseDir + "videos/fireBProcessed/", baseDir + "fireBBig-train-leveldb", vec2i(164, 164), 20000);
+    helper::videoToDatabase(baseDir + "videos/fireBProcessed/", baseDir + "fireBBig-test-leveldb", vec2i(164, 164), 500);
+
+    //ParticleSystem::makeDatabase(baseDir + "particles-train-leveldb", 20000);
+    //ParticleSystem::makeDatabase(baseDir + "particles-test-leveldb", 500);
 
     
     //makeSimulationVideo();

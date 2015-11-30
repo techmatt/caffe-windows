@@ -30,6 +30,13 @@ namespace helper
         return image;
     }
 
+    inline ColorImageR8G8B8A8 gridToImage(const Grid2<vec3f> &grid)
+    {
+        Grid2<vec3f> meanValues = grid;
+        meanValues.setValues(vec3f::origin);
+        return gridToImage(grid, meanValues);
+    }
+
     inline ColorImageR8G8B8A8 upsample(const ColorImageR8G8B8A8 &input)
     {
         ColorImageR8G8B8A8 result(input.getDimensions() * 2);

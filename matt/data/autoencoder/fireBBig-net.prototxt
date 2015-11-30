@@ -10,11 +10,11 @@ layer {
   transform_param {
     mirror: false
     scale: 0.0039215684
-	mean_file: "C:/Code/caffe/caffe-windows/matt/data/clouds-mean.binaryproto"
+	mean_file: "C:/Code/caffe/caffe-windows/matt/data/fireBBig-mean.binaryproto"
   }
   data_param {
-    source: "C:/Code/caffe/caffe-windows/matt/data/clouds-train-leveldb"
-    batch_size: 100
+    source: "C:/Code/caffe/caffe-windows/matt/data/fireBBig-train-leveldb"
+    batch_size: 50
     backend: LEVELDB
   }
 }
@@ -29,10 +29,10 @@ layer {
   transform_param {
     mirror: false
     scale: 0.0039215684
-	mean_file: "C:/Code/caffe/caffe-windows/matt/data/clouds-mean.binaryproto"
+	mean_file: "C:/Code/caffe/caffe-windows/matt/data/fireBBig-mean.binaryproto"
   }
   data_param {
-    source: "C:/Code/caffe/caffe-windows/matt/data/clouds-test-leveldb"
+    source: "C:/Code/caffe/caffe-windows/matt/data/fireBBig-test-leveldb"
     batch_size: 4
     backend: LEVELDB
   }
@@ -69,12 +69,24 @@ layer {
 }
 
 layer {
-  name: "merger"
+  name: "mergerA"
   type: "Concat"
   
   bottom: "f-1r"
   bottom: "f-1g"
   bottom: "f-1b"
+  
+  bottom: "f-2r"
+  bottom: "f-2g"
+  bottom: "f-2b"
+  
+  bottom: "f-3r"
+  bottom: "f-3g"
+  bottom: "f-3b"
+  
+  bottom: "f-4r"
+  bottom: "f-4g"
+  bottom: "f-4b"
   
   top: "input"
   concat_param {
@@ -83,9 +95,54 @@ layer {
 }
 
 layer {
-  name: "conv1"
+  name: "mergerB"
+  type: "Concat"
+  
+  bottom: "f-5r"
+  bottom: "f-5g"
+  bottom: "f-5b"
+  
+  top: "targetImage"
+  concat_param {
+    axis: 1
+  }
+}
+
+layer {
+  name: "conv0"
   type: "Convolution"
   bottom: "input"
+  top: "conv0"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 128
+    kernel_size: 8
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "relu-conv0"
+  type: "ReLU"
+  bottom: "conv0"
+  top: "conv0"
+}
+
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "conv0"
   top: "conv1"
   param {
     lr_mult: 1
@@ -94,7 +151,7 @@ layer {
     lr_mult: 2
   }
   convolution_param {
-    num_output: 64
+    num_output: 128
     kernel_size: 8
     stride: 2
     weight_filler {
@@ -187,7 +244,7 @@ layer {
     lr_mult: 2
   }
   inner_product_param {
-    num_output: 2048
+    num_output: 1024
     weight_filler {
       type: "xavier"
     }
@@ -216,7 +273,7 @@ layer {
     lr_mult: 2
   }
   inner_product_param {
-    num_output: 2048
+    num_output: 1024
     weight_filler {
       type: "xavier"
     }
@@ -297,8 +354,8 @@ layer {
     weight_filler {
       type: "xavier"
     }
-    pad_h: 0
-    pad_w: 0
+    pad_h: 1
+    pad_w: 1
     kernel_h: 4
     kernel_w: 4
   }
@@ -331,8 +388,8 @@ layer {
     weight_filler {
       type: "xavier"
     }
-    pad_h: 2
-    pad_w: 2
+    pad_h: 0
+    pad_w: 0
     kernel_h: 6
     kernel_w: 6
   }
@@ -360,13 +417,40 @@ layer {
     decay_mult: 0
   }
   convolution_param {
+    num_output: 128
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+    pad_h: 1
+    pad_w: 1
+    kernel_h: 8
+    kernel_w: 8
+  }
+}
+
+layer {
+  name: "deconv4"
+  type: "Deconvolution"
+  bottom: "deconv3"
+  top: "deconv4"
+  param {
+    name: "deconv4-w"
+    lr_mult: 1
+  }
+  param {
+    name: "deconv4-b"
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
     num_output: 3
     stride: 2
     weight_filler {
       type: "xavier"
     }
-    pad_h: 0
-    pad_w: 0
+    pad_h: 1
+    pad_w: 1
     kernel_h: 8
     kernel_w: 8
   }
@@ -375,7 +459,7 @@ layer {
 layer {
   name: "loss"
   type: "EuclideanLoss"
-  bottom: "deconv3"
-  bottom: "input"
+  bottom: "deconv4"
+  bottom: "targetImage"
   top: "loss"
 }

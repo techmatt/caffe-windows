@@ -16,7 +16,7 @@ void ParticleSystem::init(int particleCount, float deltaT)
 {
     baseDeltaT = deltaT;
 
-    const float avgRadius = 0.05f;
+    const float avgRadius = 0.06f;
     const float radiusVariance = 0.02f;
     
     const float avgSpeed = 2.0f;
@@ -126,7 +126,7 @@ void ParticleSystem::microStep(float deltaT)
 
 void ParticleSystem::render(Grid2<vec3f> &imageOut)
 {
-    const float gamma = 1.0f;
+    const float gamma = 6.0f;
     imageOut.setValues(vec3f::origin);
 
     const float radiusScale = 1.0f;
@@ -200,6 +200,15 @@ void ParticleSystem::makeDatabase(const string &databaseDir, int sampleCount)
 
         SimulationHistory history = ParticleSystem::makeSimulation(totalFrames);
 
+        if (sampleIndex == 0)
+        {
+            for (int frameIndex = 0; frameIndex < totalFrames; frameIndex++)
+            {
+                auto image = helper::gridToImage(history.history[0]);
+                LodePNG::save(image, R"(C:\Code\caffe\caffe-windows\matt\debug\sim)" + to_string(frameIndex) + ".png");
+            }
+        }
+
         int pIndex = 0;
         for (int frameIndex = 0; frameIndex < totalFrames; frameIndex++)
         {
@@ -236,46 +245,6 @@ void ParticleSystem::makeDatabase(const string &databaseDir, int sampleCount)
     delete batch;
     delete db;
     cout << "Processed " << count << " files." << endl;
-
-    /*ColorImageR32G32B32A32 imageHistory(imageSize, imageSize);
-    ColorImageR32G32B32A32 imageNext(imageSize, imageSize);
-    
-    ColorImageR8G8B8A8 imageHistorySave(imageSize, imageSize);
-    ColorImageR8G8B8A8 imageNextSave(imageSize, imageSize);
-
-    util::makeDirectory(directory);
-    for (int imageIndex = 0; imageIndex < imageCount; imageIndex++)
-    {
-        if (imageIndex % 1000 == 0)
-            cout << "Image " << imageIndex << " / " << imageCount << endl;
-
-        ParticleSystem system;
-        system.init(particleCount, deltaT);
-
-        for (int step = 0; step < 150; step++)
-            system.macroStep();
-
-        system.renderChain(imageHistory, imageNext);
-
-        for (auto &p : imageHistorySave)
-        {
-            vec4f color = imageHistory(p.x, p.y);
-            p.value = vec4uc(util::boundToByte(color.x * 255.0f),
-                             util::boundToByte(color.y * 255.0f),
-                             util::boundToByte(color.z * 255.0f),
-                             util::boundToByte(color.a * 255.0f));
-        }
-
-        for (auto &p : imageNextSave)
-        {
-            vec4f color = imageNext(p.x, p.y);
-            char c = util::boundToByte(color.x * 255.0f);
-            p.value = vec4uc(c, c, c, 255);
-        }
-
-        LodePNG::save(imageHistorySave, directory + to_string(imageIndex) + "_input.png", true);
-        LodePNG::save(imageNextSave, directory + to_string(imageIndex) + "_output.png", true);
-    }*/
 }
 
 SimulationHistory ParticleSystem::makeSimulation(int frameCount)

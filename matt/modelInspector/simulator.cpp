@@ -1,6 +1,8 @@
 
 #include "main.h"
 
+const string &outputLayerName = "deconv3";
+
 void SimulationState::init(const Netf &_net)
 {
     net = _net;
@@ -16,7 +18,7 @@ void SimulationState::init(const Netf &_net)
         history.history.push_back(CaffeUtil::blobToGridVec3(*dataBlob.get(), 0, 3 * historyIndex));
     }
 
-    const Blobf outputBlob = net->blob_by_name("deconv3");
+    const Blobf outputBlob = net->blob_by_name(outputLayerName);
     debugPrediction = CaffeUtil::blobToGridVec3(*outputBlob.get(), 0, 0);
 }
 
@@ -31,7 +33,7 @@ void SimulationState::step()
     
     CaffeUtil::runNetForward(net, "data");
 
-    const Blobf outputBlob = net->blob_by_name("deconv3");
+    const Blobf outputBlob = net->blob_by_name(outputLayerName);
     history.history.push_back(CaffeUtil::blobToGridVec3(*outputBlob.get(), 0, 0));
 }
 
