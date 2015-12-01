@@ -1,0 +1,157 @@
+name: "DATASETNAME-simulationA"
+
+layer {
+  name: "data"
+  type: "Data"
+  top: "data"
+  include {
+    phase: TRAIN
+  }
+  data_param {
+    source: "C:/Code/caffe/caffe-windows/matt/representationData/DATASETNAME/DATASETNAME-simulation-train-leveldb"
+    batch_size: 100
+    backend: LEVELDB
+  }
+}
+
+layer {
+  name: "data"
+  type: "Data"
+  top: "data"
+  include {
+    phase: TEST
+  }
+  data_param {
+    source: "C:/Code/caffe/caffe-windows/matt/representationData/DATASETNAME/DATASETNAME-simulation-test-leveldb"
+    batch_size: 4
+    backend: LEVELDB
+  }
+}
+
+layer {
+  name: "slicer"
+  type: "Slice"
+  
+  bottom: "data"
+  top: "f-0A"
+  top: "f-0B"
+  top: "f-1A"
+  top: "f-1B"
+  top: "f-2A"
+  top: "f-2B"
+  top: "targetValuesA"
+  top: "targetValuesB"
+  
+  slice_param {
+    axis: 1
+  }
+}
+
+layer {
+  name: "mergerA"
+  type: "Concat"
+  
+  bottom: "f-0A"
+  bottom: "f-0B"
+  bottom: "f-1A"
+  bottom: "f-1B"
+  bottom: "f-2A"
+  bottom: "f-2B"
+  top: "input"
+  
+  concat_param {
+    axis: 1
+  }
+}
+
+layer {
+  name: "ip1"
+  type: "InnerProduct"
+  bottom: "mergerA"
+  top: "ip1"
+  param { lr_mult: 1 }
+  param { lr_mult: 2 }
+  inner_product_param {
+    num_output: 3000
+    weight_filler { type: "xavier" }
+    bias_filler { type: "constant" }
+  }
+}
+
+layer {
+  name: "tanh-ip1"
+  type: "TanH"
+  bottom: "ip1"
+  top: "ip1"
+}
+
+layer {
+  name: "ip2"
+  type: "InnerProduct"
+  bottom: "ip1"
+  top: "ip2"
+  param { lr_mult: 1 }
+  param { lr_mult: 2 }
+  inner_product_param {
+    num_output: 3000
+    weight_filler { type: "xavier" }
+    bias_filler { type: "constant" }
+  }
+}
+
+layer {
+  name: "tanh-ip2"
+  type: "TanH"
+  bottom: "ip2"
+  top: "ip2"
+}
+
+layer {
+  name: "ip3"
+  type: "InnerProduct"
+  bottom: "ip2"
+  top: "ip3"
+  param { lr_mult: 1 }
+  param { lr_mult: 2 }
+  inner_product_param {
+    num_output: 3000
+    weight_filler { type: "xavier" }
+    bias_filler { type: "constant" }
+  }
+}
+
+layer {
+  name: "tanh-ip3"
+  type: "TanH"
+  bottom: "ip3"
+  top: "ip3"
+}
+
+layer {
+  name: "ip4"
+  type: "InnerProduct"
+  bottom: "ip3"
+  top: "ip4"
+  param { lr_mult: 1 }
+  param { lr_mult: 2 }
+  inner_product_param {
+    num_output: 3000
+    weight_filler { type: "xavier" }
+    bias_filler { type: "constant" }
+  }
+}
+
+layer {
+  name: "tanh-ip4"
+  type: "TanH"
+  bottom: "ip4"
+  top: "ip4"
+}
+
+layer {
+  name: "loss"
+  type: "EuclideanLoss"
+  bottom: "ip4"
+  bottom: "targetValuesA"
+  top: "loss"
+}

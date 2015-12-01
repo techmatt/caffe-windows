@@ -84,12 +84,14 @@
     <ClCompile Include="..\common\simulationUtil.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mLibSource.cpp" />
+    <ClCompile Include="representationProcessor.cpp" />
     <ClCompile Include="simulator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\simulationUtil.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="mLibInclude.h" />
+    <ClInclude Include="representationProcessor.h" />
     <ClInclude Include="simulator.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>

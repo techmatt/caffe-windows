@@ -152,6 +152,10 @@ void helper::videoToSamples(const string &inputDir, const string &outputDir, int
 
 void helper::videoToDatabase(const string &inputVideoDir, const string &outputDatabaseDir, vec2i dimensions, int sampleCount)
 {
+    const int frameChannels = 64;
+    const int frameX = 16;
+    const int frameY = 16;
+
     const int historyFrames = 4;
     const int imageChannelCount = 3;
 

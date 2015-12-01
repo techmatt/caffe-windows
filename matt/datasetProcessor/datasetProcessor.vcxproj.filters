@@ -5,13 +5,13 @@
     <ClCompile Include="mLibSource.cpp" />
     <ClCompile Include="..\common\particleSystem.cpp" />
     <ClCompile Include="..\common\simulationUtil.cpp" />
-    <ClCompile Include="imageDatabase.cpp" />
+    <ClCompile Include="representationDataset.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mLibInclude.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="..\common\particleSystem.h" />
     <ClInclude Include="..\common\simulationUtil.h" />
-    <ClInclude Include="imageDatabase.h" />
+    <ClInclude Include="representationDataset.h" />
   </ItemGroup>
 </Project>

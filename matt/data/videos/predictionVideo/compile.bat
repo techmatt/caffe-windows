@@ -1,0 +1,1 @@
+ffmpeg -i %%d.png -c:v libx264 output.mp4

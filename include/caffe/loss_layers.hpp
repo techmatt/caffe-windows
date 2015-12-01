@@ -12,7 +12,7 @@
 
 namespace caffe {
 
-const float kLOG_THRESHOLD = 1e-20;
+const float kLOG_THRESHOLD = 1e-20f;
 
 /**
  * @brief Computes the classification accuracy for a one-of-many

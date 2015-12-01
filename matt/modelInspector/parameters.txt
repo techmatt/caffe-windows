@@ -1,17 +1,17 @@
 
-pretrainedModelSpec=C:\Code\caffe\caffe-windows\matt\data\autoencoder\particles-net.prototxt
-pretrainedModelParams=C:\Code\caffe\caffe-windows\matt\data\autoencoder\particles_iter_10502.caffemodel
+#pretrainedModelSpec=C:\Code\caffe\caffe-windows\matt\data\autoencoder\particles-net.prototxt
+#pretrainedModelParams=C:\Code\caffe\caffe-windows\matt\data\autoencoder\particles_iter_10502.caffemodel
 
 #pretrainedModelSpec=C:\Code\caffe\caffe-windows\matt\data\autoencoder\clouds-netA.prototxt
 #pretrainedModelParams=C:\Code\caffe\caffe-windows\matt\data\autoencoder\clouds_iter_30584.caffemodel
 
-#pretrainedModelSpec=C:\Code\caffe\caffe-windows\matt\data\autoencoder\fireB-net.prototxt
-#pretrainedModelParams=C:\Code\caffe\caffe-windows\matt\data\autoencoder\fireB_iter_60000.caffemodel
+pretrainedModelSpec=C:\Code\caffe\caffe-windows\matt\data\autoencoder\fireB-net.prototxt
+pretrainedModelParams=C:\Code\caffe\caffe-windows\matt\data\autoencoder\fireB_iter_32813.caffemodel
 
 #pretrainedModelSpec=C:\Code\caffe\caffe-windows\matt\data\autoencoder\fireA-net.prototxt
 #pretrainedModelParams=C:\Code\caffe\caffe-windows\matt\data\autoencoder\fireA_iter_9005.caffemodel
 
-pretrainedModelSpec=C:\Code\caffe\caffe-windows\matt\data\autoencoder\fireBBig-net.prototxt
-pretrainedModelParams=C:\Code\caffe\caffe-windows\matt\data\autoencoder\fireBBig_iter_685.caffemodel
+#pretrainedModelSpec=C:\Code\caffe\caffe-windows\matt\data\autoencoder\fireBBig-net.prototxt
+#pretrainedModelParams=C:\Code\caffe\caffe-windows\matt\data\autoencoder\fireBBig_iter_685.caffemodel
 
-meanFile=C:\Code\caffe\caffe-windows\matt\data\fireBBig-mean.binaryproto
+meanFile=C:\Code\caffe\caffe-windows\matt\data\fireB-mean.binaryproto

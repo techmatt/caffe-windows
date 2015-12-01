@@ -98,17 +98,69 @@ struct CaffeUtil
         }
     }
 
-    static void runNetForward(const Netf &net, const string &inputLayerName)
+    static Grid3<float> blobToGrid3(const Blob<float> &blob, int imageIndex)
     {
-        int inputLayerIndex = -1;
+        Grid3<float> result;
+        result.allocate(blob.width(), blob.height(), blob.channels());
+
+        for (int z = 0; z < result.getDimZ(); z++)
+            for (int y = 0; y < result.getDimY(); y++)
+                for (int x = 0; x < result.getDimX(); x++)
+                {
+                    const float *dataStart = blob.cpu_data() + blob.offset(imageIndex, z, x, y);
+                    result(x, y, z) = *dataStart;
+                }
+        return result;
+    }
+
+    static void loadGrid3IntoBlob(const Grid3<float> &grid, Blobf &blob, int imageIndex)
+    {
+        float *cpuPtr = (float*)blob->data()->mutable_cpu_data();
+        for (int z = 0; z < grid.getDimZ(); z++)
+            for (int y = 0; y < grid.getDimY(); y++)
+                for (int x = 0; x < grid.getDimX(); x++)
+                {
+                    float *dataStart = cpuPtr + blob->offset(imageIndex, z, x, y);
+                    *dataStart = grid(x, y, z);
+                }
+    }
+
+    static int getLayerIndex(const Netf &net, const string &layerName)
+    {
+        int result = -1;
         for (int layerIndex = 0; layerIndex < net->layers().size(); layerIndex++)
         {
-            if (net->layer_names()[layerIndex] == inputLayerName)
-                inputLayerIndex = layerIndex;
+            if (net->layer_names()[layerIndex] == layerName)
+                result = layerIndex;
         }
-        if (inputLayerIndex == -1)
-            LOG(ERROR) << "Input layer not found: " << inputLayerName;
+        if (result == -1)
+            LOG(ERROR) << "Input layer not found: " << layerName;
+        return result;
+    }
 
+    static void runNetForward(const Netf &net, const string &inputLayerName)
+    {
+        const int inputLayerIndex = getLayerIndex(net, inputLayerName);
         net->ForwardFrom(inputLayerIndex + 1);
+    }
+
+    static void runNetForward(const Netf &net, const string &inputLayerName, const Grid3<float> &inputLayerData)
+    {
+        const int inputLayerIndex = getLayerIndex(net, inputLayerName);
+
+        Blobf inputBlob = net->blob_by_name(inputLayerName);
+        loadGrid3IntoBlob(inputLayerData, inputBlob, 0);
+        
+        net->ForwardFrom(inputLayerIndex + 1);
+    }
+
+    static Grid3<float> getBlobAsGrid(const Netf &net, const string &blobName)
+    {
+        if (!net->has_blob(blobName))
+            LOG(ERROR) << "blob not found: " << blobName;
+
+        auto blob = net->blob_by_name(blobName);
+
+        return blobToGrid3(*blob.get(), 0);
     }
 };

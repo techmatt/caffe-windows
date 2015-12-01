@@ -1,0 +1,413 @@
+name: "CloudsSimulation"
+
+layer {
+  name: "data"
+  type: "Data"
+  top: "data"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    mirror: false
+    scale: 0.0039215684
+	mean_file: "C:/Code/caffe/caffe-windows/matt/representationData/fire/fire-imageset-mean.binaryproto"
+  }
+  data_param {
+    source: "C:/Code/caffe/caffe-windows/matt/representationData/fire/fire-imageset-train-leveldb"
+    batch_size: 100
+    backend: LEVELDB
+  }
+}
+
+layer {
+  name: "data"
+  type: "Data"
+  top: "data"
+  include {
+    phase: TEST
+  }
+  transform_param {
+    mirror: false
+    scale: 0.0039215684
+	mean_file: "C:/Code/caffe/caffe-windows/matt/representationData/fire/fire-imageset-mean.binaryproto"
+  }
+  data_param {
+    source: "C:/Code/caffe/caffe-windows/matt/representationData/fire/fire-imageset-test-leveldb"
+    batch_size: 4
+    backend: LEVELDB
+  }
+}
+
+layer {
+  name: "slicer"
+  type: "Slice"
+  bottom: "data"
+  
+  top: "f-1r"
+  top: "f-1g"
+  top: "f-1b"
+  
+  top: "f-2r"
+  top: "f-2g"
+  top: "f-2b"
+  
+  top: "f-3r"
+  top: "f-3g"
+  top: "f-3b"
+  
+  top: "f-4r"
+  top: "f-4g"
+  top: "f-4b"
+  
+  top: "f-5r"
+  top: "f-5g"
+  top: "f-5b"
+  
+  slice_param {
+    axis: 1
+  }
+}
+
+layer {
+  name: "mergerNullifier"
+  type: "Concat"
+  
+  top: "silence"
+  bottom: "f-1r"
+  bottom: "f-1g"
+  bottom: "f-1b"
+  
+  bottom: "f-2r"
+  bottom: "f-2g"
+  bottom: "f-2b"
+  
+  bottom: "f-3r"
+  bottom: "f-3g"
+  bottom: "f-3b"
+  
+  bottom: "f-4r"
+  bottom: "f-4g"
+  bottom: "f-4b"
+  
+  concat_param {
+    axis: 1
+  }
+}
+
+layer {
+  name: "silence"
+  type: "Silence"
+  bottom: "silence"
+}
+
+layer {
+  name: "mergerA"
+  type: "Concat"
+  
+  bottom: "f-5r"
+  bottom: "f-5g"
+  bottom: "f-5b"
+  
+  top: "input"
+  concat_param {
+    axis: 1
+  }
+}
+
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "input"
+  top: "conv1"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 128
+    kernel_size: 8
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "relu-conv1"
+  type: "ReLU"
+  bottom: "conv1"
+  top: "conv1"
+}
+
+layer {
+  name: "conv2"
+  type: "Convolution"
+  bottom: "conv1"
+  top: "conv2"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 128
+    kernel_size: 6
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "relu-conv2"
+  type: "ReLU"
+  bottom: "conv2"
+  top: "conv2"
+}
+
+layer {
+  name: "conv3"
+  type: "Convolution"
+  bottom: "conv2"
+  top: "conv3"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 128
+    kernel_size: 4
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "relu-conv3"
+  type: "ReLU"
+  bottom: "conv3"
+  top: "conv3"
+}
+
+layer {
+  name: "ip1"
+  type: "InnerProduct"
+  bottom: "conv3"
+  top: "ip1"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 3000
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "tanh-ip1"
+  type: "TanH"
+  bottom: "ip1"
+  top: "ip1"
+}
+
+layer {
+  name: "ip2"
+  type: "InnerProduct"
+  bottom: "ip1"
+  top: "ip2"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 3000
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "tanh-ip2"
+  type: "TanH"
+  bottom: "ip2"
+  top: "ip2"
+}
+
+layer {
+  name: "ip3"
+  type: "InnerProduct"
+  bottom: "ip2"
+  top: "ip3"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 16384
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "tanh-ip3"
+  type: "TanH"
+  bottom: "ip3"
+  top: "ip3"
+}
+
+layer {
+  name: "reshape"
+  type: "Reshape"
+  bottom: "ip3"
+  top: "reshape"
+  reshape_param {
+    shape {
+	  dim: -1
+      dim: 64
+      dim: 16
+      dim: 16
+    }
+  }
+}
+
+layer {
+  name: "deconv1"
+  type: "Deconvolution"
+  bottom: "reshape"
+  top: "deconv1"
+  param {
+    name: "deconv1-w"
+    lr_mult: 1
+  }
+  param {
+    name: "deconv1-b"
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 4
+    kernel_w: 4
+  }
+}
+
+layer {
+  name: "relu-deconv1"
+  type: "ReLU"
+  bottom: "deconv1"
+  top: "deconv1"
+}
+
+layer {
+  name: "deconv2"
+  type: "Deconvolution"
+  bottom: "deconv1"
+  top: "deconv2"
+  param {
+    name: "deconv2-w"
+    lr_mult: 1
+  }
+  param {
+    name: "deconv2-b"
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+    pad_h: 2
+    pad_w: 2
+    kernel_h: 6
+    kernel_w: 6
+  }
+}
+
+layer {
+  name: "relu-deconv2"
+  type: "ReLU"
+  bottom: "deconv2"
+  top: "deconv2"
+}
+
+layer {
+  name: "deconv3"
+  type: "Deconvolution"
+  bottom: "deconv2"
+  top: "deconv3"
+  param {
+    name: "deconv3-w"
+    lr_mult: 1
+  }
+  param {
+    name: "deconv3-b"
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 3
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 8
+    kernel_w: 8
+  }
+}
+
+layer {
+  name: "loss"
+  type: "EuclideanLoss"
+  bottom: "deconv3"
+  bottom: "input"
+  top: "loss"
+}
